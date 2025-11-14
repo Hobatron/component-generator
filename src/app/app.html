@@ -1,23 +1,32 @@
-<div>
-  <h2>Firestore Collections</h2>
-  <h3>Actions</h3>
-  <ul>
-    @for (item of itemsa$ | async; track item) {
-      <li>{{ item.name }}</li>
-    }
-  </ul>
-  
-  <h3>Equipment</h3>
-  <ul>
-    @for (item of itemsb$ | async; track item) {
-      <li>{{ item.name }}</li>
-    }
-  </ul>
-  
-  <h3>Usables</h3>
-  <ul>
-    @for (item of itemsc$ | async; track item) {
-      <li>{{ item.name }}</li>
-    }
-  </ul>
-</div>
+
+<header class="app-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <h1 class="app-title">Component Generator</h1>
+      <span class="app-subtitle">Game Data Management</span>
+    </div>
+    
+    <nav class="nav-section">
+      <a routerLink="/" class="nav-link" routerLinkActive="active">
+        Home
+      </a>
+      <a routerLink="/projects/mortis_invictus" class="nav-link" routerLinkActive="active">
+        Mortis Invictus
+      </a>
+      <a routerLink="/projects/cardgame" class="nav-link" routerLinkActive="active">
+        Card Game
+      </a>
+      <a routerLink="/projects/rpggame" class="nav-link" routerLinkActive="active">
+        RPG Game
+      </a>
+    </nav>
+    
+    <div class="project-indicator">
+      <span class="current-project">{{ firestoreService.currentProject$ | async }}</span>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
