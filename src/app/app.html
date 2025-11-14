@@ -10,20 +10,36 @@
       <a routerLink="/" class="nav-link" routerLinkActive="active">
         Home
       </a>
-      <a routerLink="/projects/mortis_invictus" class="nav-link" routerLinkActive="active">
-        Mortis Invictus
-      </a>
-      <a routerLink="/projects/cardgame" class="nav-link" routerLinkActive="active">
-        Card Game
-      </a>
-      <a routerLink="/projects/rpggame" class="nav-link" routerLinkActive="active">
-        RPG Game
-      </a>
+      
+      <div class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
+        <button class="dropdown-trigger nav-link">
+          Projects ▼
+        </button>
+        <div class="dropdown-menu" [class.show]="showDropdown">
+          <a routerLink="/projects/mortis_invictus" class="dropdown-item">
+            <span class="project-icon">⚔️</span>
+            <span class="project-info">
+              <span class="project-name">Mortis Invictus</span>
+              <span class="project-desc">Strategic board game</span>
+            </span>
+          </a>
+          <a routerLink="/projects/cardgame" class="dropdown-item">
+            <span class="project-icon">🃏</span>
+            <span class="project-info">
+              <span class="project-name">Card Game</span>
+              <span class="project-desc">Collectible card game</span>
+            </span>
+          </a>
+          <a routerLink="/projects/rpggame" class="dropdown-item">
+            <span class="project-icon">🎲</span>
+            <span class="project-info">
+              <span class="project-name">RPG Game</span>
+              <span class="project-desc">Role-playing adventure</span>
+            </span>
+          </a>
+        </div>
+      </div>
     </nav>
-    
-    <div class="project-indicator">
-      <span class="current-project">{{ firestoreService.currentProject$ | async }}</span>
-    </div>
   </div>
 </header>
 

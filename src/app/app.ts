@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 })
 export class App {
   protected readonly firestoreService = inject(FirestoreService);
+  protected showDropdown = false;
   
   constructor() {
   }
