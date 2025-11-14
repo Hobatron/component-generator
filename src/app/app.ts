@@ -22,5 +22,19 @@ export class App {
     this.itemsa$ = collectionData(aCollection);
     this.itemsb$ = collectionData(bCollection);
     this.itemsc$ = collectionData(cCollection);
+
+    // Combine all three observables and log as JSON when all have emitted
+    combineLatest([
+      this.itemsa$,
+      this.itemsb$,
+      this.itemsc$
+    ]).subscribe(([actions, equipments, usables]) => {
+      const combinedData = {
+        actions,
+        equipments,
+        usables
+      };
+      console.log('Combined Firestore data as JSON:', JSON.stringify(combinedData, null, 2));
+    });
   }
 }
