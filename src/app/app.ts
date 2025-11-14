@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   selector: 'app-root',
   templateUrl: 'app.html',
   styleUrls: ['app.scss'],
-  imports: [AsyncPipe, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink],
 })
 export class App {
   protected readonly firestoreService = inject(FirestoreService);

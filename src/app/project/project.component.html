@@ -1,0 +1,45 @@
+<div class="project-page">
+  <header class="project-header">
+    <!-- <h1>{{ projectName$ | async | titlecase }}</h1>
+    <p>{{ (currentProject$ | async)?.description || 'Game component management' }}</p>
+    
+    @if (currentProject$ | async; as project) {
+      <div class="project-info">
+        <span class="project-status">Status: {{ project.status || 'Active' }}</span>
+        @if (project.lastUpdated) {
+          <span class="project-updated">Updated: {{ project.lastUpdated.toDate() | date:'short' }}</span>
+        }
+      </div>
+    } -->
+  </header>
+
+  <div class="collections-grid">
+    @for (section of sections$ | async; track section) {
+      <section class="collection-card">
+        <div class="card-header">
+          <div class="section-icon">
+            @switch (section) {
+              @case ('actions') { ⚔️ }
+              @case ('equipments') { 🛡️ }
+              @case ('usables') { 🧪 }
+              @case ('characters') { 👤 }
+              @case ('spells') { ✨ }
+              @default { 📁 }
+            }
+          </div>
+          <h2 class="section-title">{{ section | titlecase }}</h2>
+        </div>
+        
+        <div class="card-content">
+          <p class="section-description">Manage {{ section }} for this project</p>
+          <div class="card-actions">
+            <a [routerLink]="'/projects/' + (projectName$ | async) + '/' + section" class="nav-button primary">
+              View {{ section | titlecase }}
+            </a>
+            <button class="nav-button secondary">Add New</button>
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+</div>

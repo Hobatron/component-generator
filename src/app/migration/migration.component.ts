@@ -103,9 +103,9 @@ export class MigrationComponent {
     
     try {
       const verifications = await Promise.all([
-        this.migrationService.verifyMigration('actions', `${projectPrefix}_actions`),
-        this.migrationService.verifyMigration('equipments', `${projectPrefix}_equipments`),
-        this.migrationService.verifyMigration('usables', `${projectPrefix}_usables`)
+        this.migrationService.verifyHierarchicalMigration(`${projectPrefix}_actions`, projectPrefix, 'actions'),
+        this.migrationService.verifyHierarchicalMigration(`${projectPrefix}_equipments`, projectPrefix, 'equipments'),
+        this.migrationService.verifyHierarchicalMigration(`${projectPrefix}_usables`, projectPrefix, 'usables')
       ]);
       
       const allValid = verifications.every(v => v);

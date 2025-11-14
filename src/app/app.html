@@ -1,15 +1,13 @@
-
 <header class="app-header">
   <div class="header-container">
     <div class="logo-section">
-      <h1 class="app-title">Component Generator</h1>
-      <span class="app-subtitle">Game Data Management</span>
+      <a routerLink="/" class="logo-link">
+        <h1 class="app-title">Component Generator</h1>
+        <span class="app-subtitle">Game Data Management</span>
+      </a>
     </div>
     
     <nav class="nav-section">
-      <a routerLink="/" class="nav-link" routerLinkActive="active">
-        Home
-      </a>
       
       <div class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
         <button class="dropdown-trigger nav-link">

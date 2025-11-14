@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MigrationComponent } from "../migration/migration.component";
 
 @Component({
   selector: 'app-home',
