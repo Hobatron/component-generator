@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +11,16 @@ import { Observable } from 'rxjs';
 })
 export class App {
   firestore: Firestore = inject(Firestore);
-  items$: Observable<any[]>;
+  itemsa$: Observable<any[]>;
+  itemsb$: Observable<any[]>;
+  itemsc$: Observable<any[]>;
 
   constructor() {
-    const aCollection = collection(this.firestore, 'items')
-    this.items$ = collectionData(aCollection);
+    const aCollection = collection(this.firestore, 'actions')
+    const bCollection = collection(this.firestore, 'equipments')
+    const cCollection = collection(this.firestore, 'usables')
+    this.itemsa$ = collectionData(aCollection);
+    this.itemsb$ = collectionData(bCollection);
+    this.itemsc$ = collectionData(cCollection);
   }
 }
