@@ -1,7 +1,7 @@
 <div class="project-page">
   <header class="project-header">
     <div class="header-content">
-      <h1>{{ projectName$ | async | titlecase }}</h1>
+      <h1>{{ formatProjectName(projectName$ | async) }}</h1>
       <button class="add-category-btn" (click)="openAddCategoryModal()">
         <span class="btn-icon">➕</span>
         Add New Category

@@ -8,12 +8,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import {
-  getFirestore,
-  provideFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-} from '@angular/fire/firestore';
+import { getFirestore, provideFirestore, persistentLocalCache } from '@angular/fire/firestore';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,9 +33,7 @@ export const appConfig: ApplicationConfig = {
         return firestore;
       },
       {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager(),
-        }),
+        localCache: persistentLocalCache({}),
       }
     ),
   ],

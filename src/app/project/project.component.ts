@@ -99,25 +99,24 @@ export class ProjectComponent {
     this.projectName = this.route.snapshot.params['projectName'];
     this.project$ = this.projectService.getProject(this.projectName);
 
-    this.project$.subscribe((projectData) => {
-      const collections = this.projectService.getProjectCollections(projectData);
-      this.sections$.next(collections);
-    });
-
-    // Load schemas for this project
+    // Load schemas for this project (this will populate sections)
     this.loadSchemas(this.projectName);
 
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        console.log(event.url);
-      }
-    });
+    // this.router.events.subscribe((event) => {
+    //   if (event instanceof NavigationStart) {
+    //     console.log(event.url);
+    //   }
+    // });
   }
 
   private async loadSchemas(projectName: string): Promise<void> {
     try {
       const schemas = await this.schemaService.loadSchemasForProject(projectName);
       this.schemas.set(schemas);
+
+      // Update sections list from schemas
+      const sectionIds = schemas.map((schema) => schema.id);
+      this.sections$.next(sectionIds);
     } catch (error) {
       console.error('Error loading schemas:', error);
     }
@@ -125,6 +124,16 @@ export class ProjectComponent {
 
   protected getSchemaForSection(sectionId: string): CategorySchema | undefined {
     return this.schemas().find((s) => s.id === sectionId);
+  }
+
+  protected formatProjectName(projectName: string | null | undefined): string {
+    if (!projectName) return '';
+    // Replace underscores with spaces and apply title case
+    return projectName
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   protected openAddCategoryModal(): void {
