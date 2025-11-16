@@ -13,14 +13,9 @@
     <div class="section-title-area">
       <h1 class="section-title">
         <span class="section-icon">
-          @switch (sectionName$ | async) {
-            @case ('actions') { ⚔️ }
-            @case ('equipments') { 🛡️ }
-            @case ('usables') { 🧪 }
-            @case ('characters') { 👤 }
-            @case ('spells') { ✨ }
-            @default { 📁 }
-          }
+          @switch (sectionName$ | async) { @case ('actions') { ⚔️ } @case ('equipments') { 🛡️ }
+          @case ('usables') { 🧪 } @case ('characters') { 👤 } @case ('spells') { ✨ } @default { 📁
+          } }
         </span>
         {{ sectionName$ | async | titlecase }}
       </h1>
@@ -30,7 +25,7 @@
     </div>
 
     <div class="section-actions">
-      <button class="action-button primary">
+      <button class="action-button primary" (click)="openAddModal()">
         <span class="button-icon">➕</span>
         Add New {{ sectionName$ | async | titlecase }}
       </button>
@@ -44,67 +39,69 @@
   <main class="section-content">
     <div class="items-grid">
       @for (item of sectionItems$ | async; track item.id) {
-        <div class="item-card">
-          <div class="item-header">
-            <h3 class="item-title">
-              @if (sectionName$ | async; as section) {
-                @switch (section) {
-                  @case ('actions') {
-                    {{ item.type }} #{{ item.id }}
-                  }
-                  @case ('equipments') {
-                    {{ item.name }}
-                  }
-                  @case ('usables') {
-                    {{ item.name }}
-                  }
-                  @default {
-                    {{ item.name || item.type || 'Unnamed Item' }}
-                  }
-                }
-              }
-            </h3>
-            <div class="item-actions">
-              <button class="item-action-btn edit" title="Edit">✏️</button>
-              <button class="item-action-btn delete" title="Delete">🗑️</button>
-            </div>
-          </div>
-          
-          <div class="item-content">
-            <p class="item-description">
-              {{ item.rules || 'No rules available' }}
-            </p>
-            
-            <div class="item-tags">
-              @if (item.type) {
-                <span class="item-tag type">{{ item.type }}</span>
-              }
-              
-              @if (item.cost) {
-                <span class="item-tag cost">Cost: {{ item.cost }}</span>
-              }
-              
-              @if (item.slot) {
-                <span class="item-tag slot">Slot: {{ item.slot }}</span>
-              }
-            </div>
-          </div>
-          
-          <div class="item-footer">
-            <span class="item-meta">ID: {{ item.id }}</span>
+      <div class="item-card">
+        <div class="item-header">
+          <h3 class="item-title">
+            @if (sectionName$ | async; as section) { @switch (section) { @case ('actions') {
+            {{ item.type }} #{{ item.id }}
+            } @case ('equipments') {
+            {{ item.name }}
+            } @case ('usables') {
+            {{ item.name }}
+            } @default {
+            {{ item.name || item.type || 'Unnamed Item' }}
+            } } }
+          </h3>
+          <div class="item-actions">
+            <button class="item-action-btn edit" title="Edit" (click)="openEditModal(item)">
+              ✏️
+            </button>
+            <button class="item-action-btn delete" title="Delete">🗑️</button>
           </div>
         </div>
+
+        <div class="item-content">
+          <p class="item-description">
+            {{ item.rules || 'No rules available' }}
+          </p>
+
+          <div class="item-tags">
+            @if (item.type) {
+            <span class="item-tag type">{{ item.type }}</span>
+            } @if (item.cost) {
+            <span class="item-tag cost">Cost: {{ item.cost }}</span>
+            } @if (item.slot) {
+            <span class="item-tag slot">Slot: {{ item.slot }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="item-footer">
+          <span class="item-meta">ID: {{ item.id }}</span>
+        </div>
+      </div>
       } @empty {
-        <div class="empty-state">
-          <div class="empty-icon">📭</div>
-          <h3>No {{ sectionName$ | async }} found</h3>
-          <p>Get started by adding your first {{ sectionName$ | async | titlecase }}.</p>
-          <button class="action-button primary">
-            <span class="button-icon">➕</span>
-            Add {{ sectionName$ | async | titlecase }}
-          </button>
-        </div>
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No {{ sectionName$ | async }} found</h3>
+        <p>Get started by adding your first {{ sectionName$ | async | titlecase }}.</p>
+        <button class="action-button primary" (click)="openAddModal()">
+          <span class="button-icon">➕</span>
+          Add {{ sectionName$ | async | titlecase }}
+        </button>
+      </div>
       }
     </div>
   </main>
+
+  <!-- Card Edit Modal -->
+  @if (sectionName$ | async; as sectionName) {
+  <app-card-edit-modal
+    [isOpen]="isModalOpen()"
+    [item]="editingItem()"
+    [itemType]="sectionName"
+    (close)="closeModal()"
+    (save)="saveItem($event)"
+  />
+  }
 </div>

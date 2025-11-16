@@ -1,0 +1,107 @@
+@if (isOpen()) {
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        @if (item()) { Edit {{ itemType() | titlecase }} } @else { Add New
+        {{ itemType() | titlecase }}
+        }
+      </h2>
+      <button class="close-button" (click)="onClose()" type="button">✕</button>
+    </div>
+
+    <form [formGroup]="form()" class="modal-body">
+      @if (hasField('id')) {
+      <div class="form-group">
+        <label class="form-label" for="id">{{ getFieldLabel('id') }}</label>
+        <input
+          type="number"
+          id="id"
+          formControlName="id"
+          class="form-input"
+          placeholder="Enter ID"
+          [readonly]="!!item()"
+        />
+        @if (form().get('id')?.invalid && form().get('id')?.touched) {
+        <span class="form-error">ID is required</span>
+        }
+      </div>
+      } @if (hasField('name')) {
+      <div class="form-group">
+        <label class="form-label" for="name">{{ getFieldLabel('name') }}</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="form-input"
+          placeholder="Enter name"
+        />
+      </div>
+      } @if (hasField('type')) {
+      <div class="form-group">
+        <label class="form-label" for="type">{{ getFieldLabel('type') }}</label>
+        <input
+          type="text"
+          id="type"
+          formControlName="type"
+          class="form-input"
+          placeholder="Enter type"
+        />
+        @if (form().get('type')?.invalid && form().get('type')?.touched) {
+        <span class="form-error">Type is required</span>
+        }
+      </div>
+      } @if (hasField('rules')) {
+      <div class="form-group">
+        <label class="form-label" for="rules">{{ getFieldLabel('rules') }}</label>
+        <textarea
+          id="rules"
+          formControlName="rules"
+          class="form-textarea"
+          rows="4"
+          placeholder="Enter rules and description"
+        ></textarea>
+        @if (form().get('rules')?.invalid && form().get('rules')?.touched) {
+        <span class="form-error">Rules are required</span>
+        }
+      </div>
+      } @if (hasField('cost')) {
+      <div class="form-group">
+        <label class="form-label" for="cost">{{ getFieldLabel('cost') }}</label>
+        <input
+          type="text"
+          id="cost"
+          formControlName="cost"
+          class="form-input"
+          placeholder="Enter cost"
+        />
+      </div>
+      } @if (hasField('slot')) {
+      <div class="form-group">
+        <label class="form-label" for="slot">{{ getFieldLabel('slot') }}</label>
+        <input
+          type="text"
+          id="slot"
+          formControlName="slot"
+          class="form-input"
+          placeholder="Enter slot"
+        />
+      </div>
+      }
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" class="button button-secondary" (click)="onClose()">Cancel</button>
+      <button
+        type="button"
+        class="button button-primary"
+        (click)="onSave()"
+        [class.disabled]="form().invalid"
+        [disabled]="form().invalid"
+      >
+        @if (item()) { Update } @else { Create }
+      </button>
+    </div>
+  </div>
+</div>
+}
