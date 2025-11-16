@@ -1,45 +1,195 @@
 <div class="project-page">
   <header class="project-header">
-    <!-- <h1>{{ projectName$ | async | titlecase }}</h1>
-    <p>{{ (currentProject$ | async)?.description || 'Game component management' }}</p>
-    
-    @if (currentProject$ | async; as project) {
-      <div class="project-info">
-        <span class="project-status">Status: {{ project.status || 'Active' }}</span>
-        @if (project.lastUpdated) {
-          <span class="project-updated">Updated: {{ project.lastUpdated.toDate() | date:'short' }}</span>
-        }
-      </div>
-    } -->
+    <div class="header-content">
+      <h1>{{ projectName$ | async | titlecase }}</h1>
+      <button class="add-category-btn" (click)="openAddCategoryModal()">
+        <span class="btn-icon">➕</span>
+        Add New Category
+      </button>
+    </div>
   </header>
 
   <div class="collections-grid">
     @for (section of sections$ | async; track section) {
-      <section class="collection-card">
-        <div class="card-header">
-          <div class="section-icon">
-            @switch (section) {
-              @case ('actions') { ⚔️ }
-              @case ('equipments') { 🛡️ }
-              @case ('usables') { 🧪 }
-              @case ('characters') { 👤 }
-              @case ('spells') { ✨ }
-              @default { 📁 }
-            }
-          </div>
-          <h2 class="section-title">{{ section | titlecase }}</h2>
+    <section class="collection-card">
+      <div class="card-header">
+        <div class="section-icon">
+          @if (getSchemaForSection(section); as schema) {
+          {{ schema.icon }}
+          } @else { @switch (section) { @case ('actions') { ⚔️ } @case ('equipments') { 🛡️ } @case
+          ('usables') { 🧪 } @case ('characters') { 👤 } @case ('spells') { ✨ } @default { 📁 } } }
         </div>
-        
-        <div class="card-content">
-          <p class="section-description">Manage {{ section }} for this project</p>
-          <div class="card-actions">
-            <a [routerLink]="'/projects/' + (projectName$ | async) + '/' + section" class="nav-button primary">
-              View {{ section | titlecase }}
-            </a>
-            <button class="nav-button secondary">Add New</button>
-          </div>
+        <h2 class="section-title">
+          @if (getSchemaForSection(section); as schema) {
+          {{ schema.name }}
+          } @else {
+          {{ section | titlecase }}
+          }
+        </h2>
+      </div>
+
+      <div class="card-content">
+        <p class="section-description">Manage {{ section }} for this project</p>
+        <div class="card-actions">
+          <a
+            [routerLink]="'/projects/' + (projectName$ | async) + '/' + section"
+            class="nav-button primary"
+          >
+            View {{ section | titlecase }}
+          </a>
+          @if (getSchemaForSection(section); as schema) {
+          <button class="nav-button secondary" (click)="openEditCategoryModal(schema)">
+            ✏️ Edit
+          </button>
+          }
         </div>
-      </section>
+      </div>
+    </section>
     }
   </div>
+
+  <!-- Add Category Modal -->
+  @if (isAddingCategory()) {
+  <div class="modal-overlay" (click)="closeAddCategoryModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Category</h2>
+        <button class="close-button" (click)="closeAddCategoryModal()" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="categoryName">Category Name</label>
+          <input
+            type="text"
+            id="categoryName"
+            [value]="newCategoryName()"
+            (input)="newCategoryName.set($any($event.target).value)"
+            class="form-input"
+            placeholder="e.g., Spells, Monsters, Locations"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="categoryIcon">Icon</label>
+          <select
+            id="categoryIcon"
+            [value]="newCategoryIcon()"
+            (change)="newCategoryIcon.set($any($event.target).value)"
+            class="form-select"
+          >
+            @for (option of emojiOptions; track option.emoji) {
+            <option [value]="option.emoji">{{ option.emoji }} {{ option.label }}</option>
+            }
+          </select>
+          <small class="form-hint">Choose an emoji to represent this category</small>
+        </div>
+
+        <div class="info-box">
+          <strong>Note:</strong> The category will be created with a basic ID field. You can add
+          more fields later by editing the category schema.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="button button-secondary" (click)="closeAddCategoryModal()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="button button-primary"
+          (click)="createCategory()"
+          [disabled]="!newCategoryName().trim()"
+        >
+          Create Category
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Edit Category Modal -->
+  @if (isEditingCategory() && editingSchema(); as schema) {
+  <div class="modal-overlay" (click)="closeEditCategoryModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit Category</h2>
+        <button class="close-button" (click)="closeEditCategoryModal()" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="editCategoryName">Category Name</label>
+          <input
+            type="text"
+            id="editCategoryName"
+            [value]="editCategoryName()"
+            (input)="editCategoryName.set($any($event.target).value)"
+            class="form-input"
+            placeholder="e.g., Spells, Monsters, Locations"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="editCategoryIcon">Icon</label>
+          <select
+            id="editCategoryIcon"
+            [value]="editCategoryIcon()"
+            (change)="editCategoryIcon.set($any($event.target).value)"
+            class="form-select"
+          >
+            @for (option of emojiOptions; track option.emoji) {
+            <option [value]="option.emoji" [selected]="option.emoji === editCategoryIcon()">
+              {{ option.emoji }} {{ option.label }}
+            </option>
+            }
+          </select>
+          <small class="form-hint">Choose an emoji to represent this category</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fields</label>
+          <div class="fields-list">
+            @for (field of schema.fields; track field.name) {
+            <div class="field-item">
+              <div class="field-info">
+                <span class="field-name">{{ field.label }}</span>
+                <span class="field-type">{{ field.type }}</span>
+                @if (field.required) {
+                <span class="field-badge required">Required</span>
+                }
+              </div>
+            </div>
+            }
+          </div>
+          <small class="form-hint">Field management coming soon</small>
+        </div>
+
+        <div class="danger-zone">
+          <h3 class="danger-title">Danger Zone</h3>
+          <p class="danger-description">
+            Deleting this category will remove the schema but keep existing items.
+          </p>
+          <button type="button" class="button button-danger" (click)="deleteCategory(schema)">
+            🗑️ Delete Category
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="button button-secondary" (click)="closeEditCategoryModal()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="button button-primary"
+          (click)="updateCategory()"
+          [disabled]="!editCategoryName().trim()"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

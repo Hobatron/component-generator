@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MigrationComponent } from "../migration/migration.component";
+import { MigrationComponent } from '../migration/migration.component';
+import { SchemaSeederComponent } from '../migration/schema-seeder.component';
 
 @Component({
   selector: 'app-home',
@@ -11,20 +12,18 @@ import { MigrationComponent } from "../migration/migration.component";
           <h1 class="hero-title">Component Generator</h1>
           <p class="hero-subtitle">Manage and organize your game data with ease</p>
           <p class="hero-description">
-            A powerful tool for managing game components across multiple projects. 
-            Create, edit, and organize actions, equipment, and usable items for your games.
+            A powerful tool for managing game components across multiple projects. Create, edit, and
+            organize actions, equipment, and usable items for your games.
           </p>
-          
+
           <div class="cta-buttons">
             <a routerLink="/projects/mortis_invictus" class="btn btn-primary">
               View Mortis Invictus
             </a>
-            <a routerLink="/projects/cardgame" class="btn btn-secondary">
-              Explore Projects
-            </a>
+            <a routerLink="/projects/cardgame" class="btn btn-secondary"> Explore Projects </a>
           </div>
         </div>
-        
+
         <div class="hero-visual">
           <div class="feature-cards">
             <div class="feature-card">
@@ -58,13 +57,9 @@ import { MigrationComponent } from "../migration/migration.component";
               A strategic board game featuring tactical combat and resource management.
             </p>
             <div class="project-stats">
-              <span class="stat">
-                <strong>Collections:</strong> Actions, Equipment, Usables
-              </span>
+              <span class="stat"> <strong>Collections:</strong> Actions, Equipment, Usables </span>
             </div>
-            <a routerLink="/projects/mortis_invictus" class="project-link">
-              View Project →
-            </a>
+            <a routerLink="/projects/mortis_invictus" class="project-link"> View Project → </a>
           </div>
 
           <div class="project-card">
@@ -76,13 +71,9 @@ import { MigrationComponent } from "../migration/migration.component";
               A collectible card game with unique mechanics and strategic gameplay.
             </p>
             <div class="project-stats">
-              <span class="stat">
-                <strong>Collections:</strong> Actions, Equipment, Usables
-              </span>
+              <span class="stat"> <strong>Collections:</strong> Actions, Equipment, Usables </span>
             </div>
-            <a routerLink="/projects/cardgame" class="project-link">
-              View Project →
-            </a>
+            <a routerLink="/projects/cardgame" class="project-link"> View Project → </a>
           </div>
 
           <div class="project-card">
@@ -98,9 +89,7 @@ import { MigrationComponent } from "../migration/migration.component";
                 <strong>Collections:</strong> Characters, Spells, Items, Quests
               </span>
             </div>
-            <a routerLink="/projects/rpggame" class="project-link">
-              View Project →
-            </a>
+            <a routerLink="/projects/rpggame" class="project-link"> View Project → </a>
           </div>
         </div>
       </section>
@@ -133,7 +122,6 @@ import { MigrationComponent } from "../migration/migration.component";
     </div>
   `,
   styleUrls: ['home.component.scss'],
-  imports: [RouterLink]
+  imports: [RouterLink],
 })
-export class HomeComponent {
-}
+export class HomeComponent {}

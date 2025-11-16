@@ -12,22 +12,28 @@
 
     <div class="section-title-area">
       <h1 class="section-title">
-        <span class="section-icon">
-          @switch (sectionName$ | async) { @case ('actions') { ⚔️ } @case ('equipments') { 🛡️ }
-          @case ('usables') { 🧪 } @case ('characters') { 👤 } @case ('spells') { ✨ } @default { 📁
-          } }
-        </span>
+        @if (currentSchema(); as schema) {
+        <span class="section-icon">{{ schema.icon }}</span>
+        {{ schema.name }}
+        } @else {
+        <span class="section-icon">📁</span>
         {{ sectionName$ | async | titlecase }}
+        }
       </h1>
       <p class="section-description">
-        Manage {{ sectionName$ | async }} for {{ projectName$ | async | titlecase }}
+        @if (currentSchema(); as schema) { Manage {{ schema.name }} for
+        {{ projectName$ | async | titlecase }} } @else { Manage {{ sectionName$ | async }} for
+        {{ projectName$ | async | titlecase }}
+        }
       </p>
     </div>
 
     <div class="section-actions">
       <button class="action-button primary" (click)="openAddModal()">
         <span class="button-icon">➕</span>
-        Add New {{ sectionName$ | async | titlecase }}
+        @if (currentSchema(); as schema) { Add New {{ schema.name }} } @else { Add New
+        {{ sectionName$ | async | titlecase }}
+        }
       </button>
       <button class="action-button secondary">
         <span class="button-icon">📤</span>
@@ -38,19 +44,22 @@
 
   <main class="section-content">
     <div class="items-grid">
-      @for (item of sectionItems$ | async; track item.id) {
+      @for (item of sectionItems$ | async; track item['id']) {
       <div class="item-card">
         <div class="item-header">
           <h3 class="item-title">
-            @if (sectionName$ | async; as section) { @switch (section) { @case ('actions') {
-            {{ item.type }} #{{ item.id }}
+            @if (currentSchema(); as schema) {
+            {{ schema.name }} #{{ item['id'] }}
+            } @else { @if (sectionName$ | async; as section) { @switch (section) { @case ('actions')
+            {
+            {{ item['type'] }} #{{ item['id'] }}
             } @case ('equipments') {
-            {{ item.name }}
+            {{ item['name'] }}
             } @case ('usables') {
-            {{ item.name }}
+            {{ item['name'] }}
             } @default {
-            {{ item.name || item.type || 'Unnamed Item' }}
-            } } }
+            {{ item['name'] || item['type'] || 'Unnamed Item' }}
+            } } } }
           </h3>
           <div class="item-actions">
             <button class="item-action-btn edit" title="Edit" (click)="openEditModal(item)">
@@ -62,22 +71,22 @@
 
         <div class="item-content">
           <p class="item-description">
-            {{ item.rules || 'No rules available' }}
+            {{ item['rules'] || 'No rules available' }}
           </p>
 
           <div class="item-tags">
-            @if (item.type) {
-            <span class="item-tag type">{{ item.type }}</span>
-            } @if (item.cost) {
-            <span class="item-tag cost">Cost: {{ item.cost }}</span>
-            } @if (item.slot) {
-            <span class="item-tag slot">Slot: {{ item.slot }}</span>
+            @if (item['type']) {
+            <span class="item-tag type">{{ item['type'] }}</span>
+            } @if (item['cost']) {
+            <span class="item-tag cost">Cost: {{ item['cost'] }}</span>
+            } @if (item['slot']) {
+            <span class="item-tag slot">Slot: {{ item['slot'] }}</span>
             }
           </div>
         </div>
 
         <div class="item-footer">
-          <span class="item-meta">ID: {{ item.id }}</span>
+          <span class="item-meta">ID: {{ item['id'] }}</span>
         </div>
       </div>
       } @empty {
@@ -95,11 +104,11 @@
   </main>
 
   <!-- Card Edit Modal -->
-  @if (sectionName$ | async; as sectionName) {
+  @if (currentSchema(); as schema) {
   <app-card-edit-modal
     [isOpen]="isModalOpen()"
     [item]="editingItem()"
-    [itemType]="sectionName"
+    [schema]="schema"
     (close)="closeModal()"
     (save)="saveItem($event)"
   />

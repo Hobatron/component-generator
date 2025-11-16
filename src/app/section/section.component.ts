@@ -1,22 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import {
-  collection,
-  collectionData,
-  doc,
-  Firestore,
-  addDoc,
-  updateDoc,
-} from '@angular/fire/firestore';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardEditModalComponent } from '../card-edit-modal/card-edit-modal.component';
-import { Action } from '../models/action.model';
-import { Equipment } from '../models/equipment.model';
-import { Usable } from '../models/usable.model';
-
-type CardItem = Action | Equipment | Usable;
+import { CategorySchema, DynamicItem } from '../models/category-schema.model';
+import { CategorySchemaService } from '../services/category-schema.service';
+import { ItemService } from '../services/item.service';
 
 @Component({
   selector: 'app-section',
@@ -25,40 +15,74 @@ type CardItem = Action | Equipment | Usable;
   imports: [AsyncPipe, TitleCasePipe, RouterLink, CardEditModalComponent],
 })
 export class SectionComponent {
-  private readonly firestore = inject(Firestore);
   private readonly route = inject(ActivatedRoute);
+  private readonly schemaService = inject(CategorySchemaService);
+  private readonly itemService = inject(ItemService);
 
   protected readonly projectName$ = this.route.params.pipe(map((params) => params['projectName']));
 
   protected readonly sectionName$ = this.route.params.pipe(map((params) => params['section']));
 
-  sectionItems$: Observable<any[]>;
-  private sectionItemsSubject = new BehaviorSubject<any[]>([]);
+  sectionItems$: Observable<DynamicItem[]>;
+
+  // Store route params for async operations
+  private readonly projectName: string;
+  private readonly sectionName: string;
 
   // Modal state
   protected readonly isModalOpen = signal(false);
-  protected readonly editingItem = signal<CardItem | null>(null);
+  protected readonly editingItem = signal<DynamicItem | null>(null);
+  protected readonly currentSchema = signal<CategorySchema | null>(null);
 
   constructor() {
     // Load data in constructor based on route parameters
-    const projectName = this.route.snapshot.params['projectName'];
-    const sectionName = this.route.snapshot.params['section'];
+    this.projectName = this.route.snapshot.params['projectName'];
+    this.sectionName = this.route.snapshot.params['section'];
 
-    if (projectName && sectionName) {
-      const projectDocRef = doc(this.firestore, 'projects', projectName);
-      const sectionCollectionRef = collection(projectDocRef, sectionName);
-      this.sectionItems$ = collectionData(sectionCollectionRef, { idField: 'id' });
+    if (this.projectName && this.sectionName) {
+      // Load schema for this category
+      this.loadSchema(this.projectName, this.sectionName);
+
+      // Load items using service
+      this.sectionItems$ = this.itemService.getItems(this.projectName, this.sectionName);
     } else {
-      this.sectionItems$ = this.sectionItemsSubject.asObservable();
+      // Fallback to empty observable
+      this.sectionItems$ = new Observable<DynamicItem[]>();
+    }
+  }
+
+  private async loadSchema(projectName: string, schemaId: string): Promise<void> {
+    try {
+      const schema = await this.schemaService.getSchema(projectName, schemaId);
+      if (schema) {
+        this.currentSchema.set(schema);
+      } else {
+        console.warn(
+          `Schema not found for ${projectName}/${schemaId}. Please create a schema in Firestore.`
+        );
+        // Optionally set a default schema or show error to user
+      }
+    } catch (error) {
+      console.error('Error loading schema:', error);
     }
   }
 
   protected openAddModal(): void {
+    if (!this.currentSchema()) {
+      console.error('Cannot open modal: Schema not loaded');
+      alert('Schema not loaded. Please ensure category schemas are configured in Firestore.');
+      return;
+    }
     this.editingItem.set(null);
     this.isModalOpen.set(true);
   }
 
-  protected openEditModal(item: CardItem): void {
+  protected openEditModal(item: DynamicItem): void {
+    if (!this.currentSchema()) {
+      console.error('Cannot open modal: Schema not loaded');
+      alert('Schema not loaded. Please ensure category schemas are configured in Firestore.');
+      return;
+    }
     this.editingItem.set(item);
     this.isModalOpen.set(true);
   }
@@ -68,26 +92,22 @@ export class SectionComponent {
     this.editingItem.set(null);
   }
 
-  protected async saveItem(item: CardItem): Promise<void> {
-    const projectName = this.route.snapshot.params['projectName'];
-    const sectionName = this.route.snapshot.params['section'];
-
-    if (!projectName || !sectionName) return;
-
-    const projectDocRef = doc(this.firestore, 'projects', projectName);
-    const sectionCollectionRef = collection(projectDocRef, sectionName);
+  protected async saveItem(item: DynamicItem): Promise<void> {
+    if (!this.projectName || !this.sectionName) return;
 
     try {
       if (this.editingItem()) {
         // Update existing item
-        const itemDocRef = doc(sectionCollectionRef, String(item.id));
-        await updateDoc(itemDocRef, { ...item });
+        const itemId = String(item['id']);
+        await this.itemService.updateItem(this.projectName, this.sectionName, itemId, item);
       } else {
         // Add new item
-        await addDoc(sectionCollectionRef, item);
+        await this.itemService.addItem(this.projectName, this.sectionName, item);
       }
+      this.closeModal();
     } catch (error) {
       console.error('Error saving item:', error);
+      alert('Failed to save item. Please try again.');
     }
   }
 }
