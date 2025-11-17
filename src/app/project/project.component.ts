@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { DocumentData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Project } from '../models/project.model';
-import { CategorySchema } from '../models/category-schema.model';
+import { CategorySchema, FieldDefinition } from '../models/category-schema.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ProjectService } from '../services/project.service';
 
@@ -40,6 +40,15 @@ export class ProjectComponent {
   protected readonly editingSchema = signal<CategorySchema | null>(null);
   protected readonly editCategoryName = signal('');
   protected readonly editCategoryIcon = signal('📁');
+  protected readonly editingFields = signal<FieldDefinition[]>([]);
+
+  // New field state
+  protected readonly isAddingField = signal(false);
+  protected readonly newFieldName = signal('');
+  protected readonly newFieldLabel = signal('');
+  protected readonly newFieldType = signal<'text' | 'number' | 'textarea' | 'dropdown'>('text');
+  protected readonly newFieldRequired = signal(false);
+  protected readonly newFieldOptions = signal('');
 
   // Emoji options for icon picker
   protected readonly emojiOptions = [
@@ -99,27 +108,13 @@ export class ProjectComponent {
     this.projectName = this.route.snapshot.params['projectName'];
     this.project$ = this.projectService.getProject(this.projectName);
 
-    // Load schemas for this project (this will populate sections)
-    this.loadSchemas(this.projectName);
-
-    // this.router.events.subscribe((event) => {
-    //   if (event instanceof NavigationStart) {
-    //     console.log(event.url);
-    //   }
-    // });
-  }
-
-  private async loadSchemas(projectName: string): Promise<void> {
-    try {
-      const schemas = await this.schemaService.loadSchemasForProject(projectName);
+    // Subscribe to schemas for this project
+    this.schemaService.getSchemas(this.projectName).subscribe((schemas) => {
       this.schemas.set(schemas);
-
       // Update sections list from schemas
       const sectionIds = schemas.map((schema) => schema.id);
       this.sections$.next(sectionIds);
-    } catch (error) {
-      console.error('Error loading schemas:', error);
-    }
+    });
   }
 
   protected getSchemaForSection(sectionId: string): CategorySchema | undefined {
@@ -150,12 +145,82 @@ export class ProjectComponent {
     this.editingSchema.set(schema);
     this.editCategoryName.set(schema.name);
     this.editCategoryIcon.set(schema.icon);
+    this.editingFields.set([...schema.fields]); // Copy fields array
     this.isEditingCategory.set(true);
   }
 
   protected closeEditCategoryModal(): void {
     this.isEditingCategory.set(false);
     this.editingSchema.set(null);
+    this.isAddingField.set(false);
+  }
+
+  protected openAddFieldForm(): void {
+    this.newFieldName.set('');
+    this.newFieldLabel.set('');
+    this.newFieldType.set('text');
+    this.newFieldRequired.set(false);
+    this.newFieldOptions.set('');
+    this.isAddingField.set(true);
+  }
+
+  protected cancelAddField(): void {
+    this.isAddingField.set(false);
+  }
+
+  protected addField(): void {
+    const name = this.newFieldName().trim();
+    const label = this.newFieldLabel().trim();
+
+    if (!name || !label) {
+      alert('Field name and label are required');
+      return;
+    }
+
+    // Check for duplicate field names
+    if (this.editingFields().some((f) => f.name === name)) {
+      alert('A field with this name already exists');
+      return;
+    }
+
+    const newField: FieldDefinition = {
+      name,
+      label,
+      type: this.newFieldType(),
+      required: this.newFieldRequired(),
+    };
+
+    // Add options for dropdown fields
+    if (this.newFieldType() === 'dropdown') {
+      const options = this.newFieldOptions()
+        .split(',')
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0);
+
+      if (options.length === 0) {
+        alert('Dropdown fields must have at least one option');
+        return;
+      }
+
+      newField.options = options;
+    }
+
+    // Add field to editing fields
+    this.editingFields.set([...this.editingFields(), newField]);
+    this.isAddingField.set(false);
+  }
+
+  protected removeField(fieldName: string): void {
+    // Don't allow removing the ID field
+    if (fieldName === 'id') {
+      alert('Cannot remove the ID field');
+      return;
+    }
+
+    const confirmed = confirm(`Remove field "${fieldName}"?`);
+    if (confirmed) {
+      this.editingFields.set(this.editingFields().filter((f) => f.name !== fieldName));
+    }
   }
 
   protected async createCategory(): Promise<void> {
@@ -179,8 +244,7 @@ export class ProjectComponent {
     };
 
     try {
-      await this.schemaService.saveSchema(this.projectName, newSchema);
-      await this.loadSchemas(this.projectName);
+      await this.schemaService.addSchema(this.projectName, newSchema);
       this.closeAddCategoryModal();
 
       // Navigate to the new category
@@ -201,16 +265,19 @@ export class ProjectComponent {
       return;
     }
 
-    // Update schema with new name and icon
+    // Update schema with new name, icon, and fields
     const updatedSchema: CategorySchema = {
       ...schema,
       name,
       icon,
+      fields: this.editingFields(),
     };
 
+    // Update the schemas array with the updated schema
+    const updatedSchemas = this.schemas().map((s) => (s.id === schema.id ? updatedSchema : s));
+
     try {
-      await this.schemaService.saveSchema(this.projectName, updatedSchema);
-      await this.loadSchemas(this.projectName);
+      await this.schemaService.updateSchema(this.projectName, updatedSchemas);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error updating category:', error);
@@ -225,9 +292,11 @@ export class ProjectComponent {
 
     if (!confirmed) return;
 
+    // Filter out the deleted schema
+    const updatedSchemas = this.schemas().filter((s) => s.id !== schema.id);
+
     try {
-      await this.schemaService.deleteSchema(this.projectName, schema.id);
-      await this.loadSchemas(this.projectName);
+      await this.schemaService.deleteSchema(this.projectName, updatedSchemas);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error deleting category:', error);

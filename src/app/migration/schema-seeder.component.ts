@@ -165,7 +165,7 @@ export class SchemaSeederComponent {
 
     try {
       for (const schema of DEFAULT_SCHEMAS) {
-        await this.schemaService.saveSchema(this.projectId(), schema);
+        await this.schemaService.addSchema(this.projectId(), schema);
       }
       this.showMessage(
         `Successfully seeded ${DEFAULT_SCHEMAS.length} schemas for project: ${this.projectId()}`,

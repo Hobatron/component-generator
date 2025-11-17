@@ -40,30 +40,23 @@ export class SectionComponent {
     this.sectionName = this.route.snapshot.params['section'];
 
     if (this.projectName && this.sectionName) {
-      // Load schema for this category
-      this.loadSchema(this.projectName, this.sectionName);
+      // Subscribe to schemas and find the one for this section
+      this.schemaService.getSchemas(this.projectName).subscribe((schemas) => {
+        const schema = schemas.find((s) => s.id === this.sectionName);
+        if (schema) {
+          this.currentSchema.set(schema);
+        } else {
+          console.warn(
+            `Schema not found for ${this.projectName}/${this.sectionName}. Please create a schema.`
+          );
+        }
+      });
 
       // Load items using service
       this.sectionItems$ = this.itemService.getItems(this.projectName, this.sectionName);
     } else {
       // Fallback to empty observable
       this.sectionItems$ = new Observable<DynamicItem[]>();
-    }
-  }
-
-  private async loadSchema(projectName: string, schemaId: string): Promise<void> {
-    try {
-      const schema = await this.schemaService.getSchema(projectName, schemaId);
-      if (schema) {
-        this.currentSchema.set(schema);
-      } else {
-        console.warn(
-          `Schema not found for ${projectName}/${schemaId}. Please create a schema in Firestore.`
-        );
-        // Optionally set a default schema or show error to user
-      }
-    } catch (error) {
-      console.error('Error loading schema:', error);
     }
   }
 

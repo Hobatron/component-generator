@@ -3,6 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { FirestoreService } from './services/firestore.service';
 import { Observable } from 'rxjs';
+import { setLogLevel, LogLevel } from '@angular/fire';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,8 @@ import { Observable } from 'rxjs';
 export class App {
   protected readonly firestoreService = inject(FirestoreService);
   protected showDropdown = false;
-  
+
   constructor() {
+    setLogLevel(LogLevel.VERBOSE);
   }
 }
