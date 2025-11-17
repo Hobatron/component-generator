@@ -273,11 +273,8 @@ export class ProjectComponent {
       fields: this.editingFields(),
     };
 
-    // Update the schemas array with the updated schema
-    const updatedSchemas = this.schemas().map((s) => (s.id === schema.id ? updatedSchema : s));
-
     try {
-      await this.schemaService.updateSchema(this.projectName, updatedSchemas);
+      await this.schemaService.updateSchema(this.projectName, schema.id, updatedSchema);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error updating category:', error);
@@ -292,11 +289,8 @@ export class ProjectComponent {
 
     if (!confirmed) return;
 
-    // Filter out the deleted schema
-    const updatedSchemas = this.schemas().filter((s) => s.id !== schema.id);
-
     try {
-      await this.schemaService.deleteSchema(this.projectName, updatedSchemas);
+      await this.schemaService.deleteSchema(this.projectName, schema.id);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error deleting category:', error);
