@@ -176,6 +176,24 @@
   margin-bottom: 1rem;
 }
 
+.project-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.project-icon-large {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
 .project-name {
   margin: 0;
   font-size: 1.5rem;
@@ -232,6 +250,32 @@
   &:hover {
     color: #4f46e5;
   }
+}
+
+.empty-projects {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-projects h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-projects p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 1rem;
 }
 
 // Features Section

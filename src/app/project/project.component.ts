@@ -249,9 +249,6 @@ export class ProjectComponent {
     try {
       await this.schemaService.addSchema(this.projectName, newSchema);
       this.closeAddCategoryModal();
-
-      // Navigate to the new category
-      this.router.navigate(['/projects', this.projectName, id]);
     } catch (error) {
       console.error('Error creating category:', error);
       alert('Failed to create category. Please try again.');

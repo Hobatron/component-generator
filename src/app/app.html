@@ -6,35 +6,27 @@
         <span class="app-subtitle">Game Data Management</span>
       </a>
     </div>
-    
+
     <nav class="nav-section">
-      
       <div class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
-        <button class="dropdown-trigger nav-link">
-          Projects ▼
-        </button>
+        <button class="dropdown-trigger nav-link">Projects ▼</button>
         <div class="dropdown-menu" [class.show]="showDropdown">
-          <a routerLink="/projects/mortis_invictus" class="dropdown-item">
-            <span class="project-icon">⚔️</span>
+          @for (project of projects$ | async; track project.id) {
+          <a [routerLink]="'/projects/' + project.id" class="dropdown-item">
+            <span class="project-icon">{{ project.icon || '🎮' }}</span>
             <span class="project-info">
-              <span class="project-name">Mortis Invictus</span>
-              <span class="project-desc">Strategic board game</span>
+              <span class="project-name">{{ project.name }}</span>
+              <span class="project-desc">{{ project.description || 'No description' }}</span>
             </span>
           </a>
-          <a routerLink="/projects/cardgame" class="dropdown-item">
-            <span class="project-icon">🃏</span>
+          }
+          <button class="dropdown-item new-project-btn" (click)="openNewProjectModal()">
+            <span class="project-icon">➕</span>
             <span class="project-info">
-              <span class="project-name">Card Game</span>
-              <span class="project-desc">Collectible card game</span>
+              <span class="project-name">New Project</span>
+              <span class="project-desc">Create a new project</span>
             </span>
-          </a>
-          <a routerLink="/projects/rpggame" class="dropdown-item">
-            <span class="project-icon">🎲</span>
-            <span class="project-info">
-              <span class="project-name">RPG Game</span>
-              <span class="project-desc">Role-playing adventure</span>
-            </span>
-          </a>
+          </button>
         </div>
       </div>
     </nav>
@@ -44,3 +36,75 @@
 <main class="main-content">
   <router-outlet></router-outlet>
 </main>
+
+<!-- New Project Modal -->
+@if (isCreatingProject()) {
+<div class="modal-overlay" (click)="closeNewProjectModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Create New Project</h2>
+      <button class="close-button" (click)="closeNewProjectModal()" type="button">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="projectName">Project Name</label>
+        <input
+          type="text"
+          id="projectName"
+          [value]="newProjectName()"
+          (input)="newProjectName.set($any($event.target).value)"
+          class="form-input"
+          placeholder="e.g., My Awesome Game"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="projectDescription">Description</label>
+        <textarea
+          id="projectDescription"
+          [value]="newProjectDescription()"
+          (input)="newProjectDescription.set($any($event.target).value)"
+          class="form-textarea"
+          placeholder="Brief description of your project"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="projectIcon">Icon</label>
+        <select
+          id="projectIcon"
+          [value]="newProjectIcon()"
+          (change)="newProjectIcon.set($any($event.target).value)"
+          class="form-select"
+        >
+          @for (option of projectEmojiOptions; track option.emoji) {
+          <option [value]="option.emoji">{{ option.emoji }} {{ option.label }}</option>
+          }
+        </select>
+        <small class="form-hint">Choose an emoji to represent this project</small>
+      </div>
+
+      <div class="info-box">
+        <strong>Note:</strong> The project will be created with an empty structure. You can add
+        categories after creation.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="button button-secondary" (click)="closeNewProjectModal()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="button button-primary"
+        (click)="createProject()"
+        [disabled]="!newProjectName().trim()"
+      >
+        Create Project
+      </button>
+    </div>
+  </div>
+</div>
+}

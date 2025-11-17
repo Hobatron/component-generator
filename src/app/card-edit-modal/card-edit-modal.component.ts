@@ -52,19 +52,25 @@ export class CardEditModalComponent {
     // Update form when item changes or set default ID for new items
     effect(() => {
       const currentItem = this.item();
+      const currentForm = this.form();
+
       if (currentItem) {
-        this.form().patchValue(currentItem);
+        currentForm.patchValue(currentItem);
         // Disable ID field when editing
-        const idControl = this.form().get('id');
+        const idControl = currentForm.get('id');
         if (idControl) {
           idControl.disable();
         }
       } else {
-        // Set next ID for new items
-        const idControl = this.form().get('id');
+        // Set next ID for new items and ensure it's valid
+        const idControl = currentForm.get('id');
         if (idControl) {
-          idControl.setValue(this.maxId() + 1);
+          const nextId = this.maxId() + 1;
+          idControl.setValue(nextId);
           idControl.enable();
+          // Mark as touched and update validity to ensure form recognizes the value
+          idControl.markAsTouched();
+          idControl.updateValueAndValidity();
         }
       }
     });
@@ -81,7 +87,8 @@ export class CardEditModalComponent {
     const group: Record<string, FormControl> = {};
 
     schema.fields.forEach((field) => {
-      const validators = field.required ? [Validators.required] : [];
+      // ID field should not be required since it's auto-generated
+      const validators = field.required && field.name !== 'id' ? [Validators.required] : [];
       group[field.name] = new FormControl('', validators);
     });
 
