@@ -31,6 +31,7 @@ export class CardEditModalComponent {
   readonly isOpen = input<boolean>(false);
   readonly item = input<DynamicItem | null>(null);
   readonly schema = input.required<CategorySchema>();
+  readonly maxId = input<number>(0);
 
   // Outputs
   readonly close = output<void>();
@@ -48,11 +49,23 @@ export class CardEditModalComponent {
       }
     });
 
-    // Update form when item changes
+    // Update form when item changes or set default ID for new items
     effect(() => {
       const currentItem = this.item();
       if (currentItem) {
         this.form().patchValue(currentItem);
+        // Disable ID field when editing
+        const idControl = this.form().get('id');
+        if (idControl) {
+          idControl.disable();
+        }
+      } else {
+        // Set next ID for new items
+        const idControl = this.form().get('id');
+        if (idControl) {
+          idControl.setValue(this.maxId() + 1);
+          idControl.enable();
+        }
       }
     });
 
@@ -81,7 +94,7 @@ export class CardEditModalComponent {
 
   protected onSave(): void {
     if (this.form().valid) {
-      const formValue = this.form().value;
+      const formValue = this.form().getRawValue(); // getRawValue includes disabled fields
       const currentSchema = this.schema();
 
       // Only include fields defined in schema

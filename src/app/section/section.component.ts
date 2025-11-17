@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -7,6 +7,7 @@ import { CardEditModalComponent } from '../card-edit-modal/card-edit-modal.compo
 import { CategorySchema, DynamicItem } from '../models/category-schema.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ItemService } from '../services/item.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-section',
@@ -23,7 +24,7 @@ export class SectionComponent {
 
   protected readonly sectionName$ = this.route.params.pipe(map((params) => params['section']));
 
-  sectionItems$: Observable<DynamicItem[]>;
+  sectionItems$!: Observable<DynamicItem[]>;
 
   // Store route params for async operations
   private readonly projectName: string;
@@ -33,6 +34,16 @@ export class SectionComponent {
   protected readonly isModalOpen = signal(false);
   protected readonly editingItem = signal<DynamicItem | null>(null);
   protected readonly currentSchema = signal<CategorySchema | null>(null);
+
+  // Convert items observable to signal for computed maxId
+  protected readonly items = signal<DynamicItem[]>([]);
+
+  // Calculate max ID from items
+  protected readonly maxId = computed(() => {
+    const itemsList = this.items();
+    if (itemsList.length === 0) return 0;
+    return Math.max(...itemsList.map((item) => Number(item['id']) || 0));
+  });
 
   constructor() {
     // Load data in constructor based on route parameters
@@ -54,6 +65,11 @@ export class SectionComponent {
 
       // Load items using service
       this.sectionItems$ = this.itemService.getItems(this.projectName, this.sectionName);
+
+      // Subscribe to items to update signal for maxId calculation
+      this.sectionItems$.subscribe((items) => {
+        this.items.set(items);
+      });
     } else {
       // Fallback to empty observable
       this.sectionItems$ = new Observable<DynamicItem[]>();

@@ -235,12 +235,15 @@ export class ProjectComponent {
     // Generate ID from name (lowercase, replace spaces with underscores)
     const id = name.toLowerCase().replace(/\s+/g, '_');
 
-    // Create basic schema with just an ID field
+    // Create basic schema with default fields
     const newSchema: CategorySchema = {
       id,
       name,
       icon,
-      fields: [{ name: 'id', label: 'ID', type: 'number', required: true }],
+      fields: [
+        { name: 'id', label: 'ID', type: 'number', required: true },
+        { name: 'name', label: 'Name', type: 'text', required: true },
+      ],
     };
 
     try {

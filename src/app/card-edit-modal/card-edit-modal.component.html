@@ -9,7 +9,7 @@
     </div>
 
     <form [formGroup]="form()" class="modal-body">
-      @for (field of schema().fields; track field.name) {
+      @for (field of schema().fields; track field.name) { @if (field.name !== 'id' || item()) {
       <div class="form-group">
         <label class="form-label" [for]="field.name">{{ field.label }}</label>
 
@@ -48,7 +48,7 @@
         <span class="form-error">{{ field.label }} is required</span>
         }
       </div>
-      }
+      } }
     </form>
 
     <div class="modal-footer">

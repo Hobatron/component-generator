@@ -11,6 +11,7 @@ export const DEFAULT_SCHEMAS: CategorySchema[] = [
     icon: '⚔️',
     fields: [
       { name: 'id', label: 'ID', type: 'number', required: true },
+      { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'type', label: 'Type', type: 'text', required: true },
       { name: 'rules', label: 'Rules', type: 'textarea', required: true },
     ],
