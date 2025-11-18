@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ProjectService } from './services/project.service';
+import { ThemeService } from './services/theme.service';
 import { Observable } from 'rxjs';
 import { setLogLevel, LogLevel } from '@angular/fire';
 
@@ -14,7 +15,9 @@ import { setLogLevel, LogLevel } from '@angular/fire';
 export class App {
   private readonly router = inject(Router);
   private readonly projectService = inject(ProjectService);
+  protected readonly themeService = inject(ThemeService);
   protected showDropdown = false;
+  protected readonly isMobileMenuOpen = signal(false);
   protected readonly isCreatingProject = signal(false);
   protected readonly newProjectName = signal('');
   protected readonly newProjectDescription = signal('');
@@ -51,12 +54,21 @@ export class App {
     setLogLevel(LogLevel.VERBOSE);
   }
 
+  protected toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update((value) => !value);
+  }
+
+  protected closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+  }
+
   protected openNewProjectModal(): void {
     this.newProjectName.set('');
     this.newProjectDescription.set('');
     this.newProjectIcon.set('🎮');
     this.isCreatingProject.set(true);
     this.showDropdown = false;
+    this.closeMobileMenu();
   }
 
   protected closeNewProjectModal(): void {

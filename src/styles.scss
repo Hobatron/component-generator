@@ -1,1 +1,150 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Theme Variables */
+:root {
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f3f4f6;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Text Colors */
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-inverse: #ffffff;
+
+  /* Border Colors */
+  --color-border-primary: #e5e7eb;
+  --color-border-secondary: #d1d5db;
+  --color-border-focus: #3b82f6;
+
+  /* Brand/Accent Colors */
+  --color-accent-primary: #667eea;
+  --color-accent-secondary: #764ba2;
+  --color-accent-hover: #4f46e5;
+
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+  /* Button Colors */
+  --color-btn-primary: #3b82f6;
+  --color-btn-primary-hover: #2563eb;
+  --color-btn-secondary: #f3f4f6;
+  --color-btn-secondary-hover: #e5e7eb;
+  --color-btn-success: #10b981;
+  --color-btn-success-hover: #059669;
+  --color-btn-danger: #ef4444;
+  --color-btn-danger-hover: #dc2626;
+  --color-btn-disabled: #9ca3af;
+
+  /* Status Colors */
+  --color-status-active-bg: #dcfce7;
+  --color-status-active-text: #166534;
+  --color-status-development-bg: #fef3c7;
+  --color-status-development-text: #92400e;
+  --color-status-planning-bg: #e0e7ff;
+  --color-status-planning-text: #3730a3;
+
+  /* Info/Alert Colors */
+  --color-info-bg: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1e40af;
+  --color-danger-bg: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #991b1b;
+
+  /* Tag Colors */
+  --color-tag-type-bg: #e0e7ff;
+  --color-tag-type-text: #3730a3;
+  --color-tag-cost-bg: #fef3c7;
+  --color-tag-cost-text: #92400e;
+  --color-tag-slot-bg: #ecfdf5;
+  --color-tag-slot-text: #065f46;
+
+  /* Shadow */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  /* Background Colors */
+  --color-bg-primary: #111827;
+  --color-bg-secondary: #1f2937;
+  --color-bg-tertiary: #374151;
+  --color-bg-elevated: #1f2937;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Text Colors */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-tertiary: #9ca3af;
+  --color-text-inverse: #111827;
+
+  /* Border Colors */
+  --color-border-primary: #374151;
+  --color-border-secondary: #4b5563;
+  --color-border-focus: #60a5fa;
+
+  /* Brand/Accent Colors */
+  --color-accent-primary: #818cf8;
+  --color-accent-secondary: #a78bfa;
+  --color-accent-hover: #6366f1;
+
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+  --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+
+  /* Button Colors */
+  --color-btn-primary: #3b82f6;
+  --color-btn-primary-hover: #60a5fa;
+  --color-btn-secondary: #374151;
+  --color-btn-secondary-hover: #4b5563;
+  --color-btn-success: #10b981;
+  --color-btn-success-hover: #34d399;
+  --color-btn-danger: #ef4444;
+  --color-btn-danger-hover: #f87171;
+  --color-btn-disabled: #6b7280;
+
+  /* Status Colors */
+  --color-status-active-bg: #064e3b;
+  --color-status-active-text: #6ee7b7;
+  --color-status-development-bg: #78350f;
+  --color-status-development-text: #fcd34d;
+  --color-status-planning-bg: #312e81;
+  --color-status-planning-text: #a5b4fc;
+
+  /* Info/Alert Colors */
+  --color-info-bg: #1e3a8a;
+  --color-info-border: #1e40af;
+  --color-info-text: #93c5fd;
+  --color-danger-bg: #7f1d1d;
+  --color-danger-border: #991b1b;
+  --color-danger-text: #fca5a5;
+
+  /* Tag Colors */
+  --color-tag-type-bg: #312e81;
+  --color-tag-type-text: #c7d2fe;
+  --color-tag-cost-bg: #78350f;
+  --color-tag-cost-text: #fde68a;
+  --color-tag-slot-bg: #064e3b;
+  --color-tag-slot-text: #6ee7b7;
+
+  /* Shadow */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Global body styles */
+body {
+  margin: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
