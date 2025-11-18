@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
-import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DocumentData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Project } from '../models/project.model';
@@ -26,11 +27,14 @@ export class ProjectComponent {
   project$: Observable<DocumentData | Project | undefined>;
   sections$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
-  // Store route params for async operations
-  private readonly projectName: string;
-
-  // Category management
-  protected readonly schemas = signal<CategorySchema[]>([]);
+  // Category management - derived from route params
+  protected readonly schemas = toSignal(
+    this.route.params.pipe(
+      map((params) => params['projectName']),
+      switchMap((projectName) => this.schemaService.getSchemas(projectName))
+    ),
+    { initialValue: [] }
+  );
   protected readonly isAddingCategory = signal(false);
   protected readonly newCategoryName = signal('');
   protected readonly newCategoryIcon = signal('📁');
@@ -105,13 +109,15 @@ export class ProjectComponent {
   ];
 
   constructor() {
-    this.projectName = this.route.snapshot.params['projectName'];
-    this.project$ = this.projectService.getProject(this.projectName);
+    // Subscribe to route parameter changes to handle project switching
+    this.project$ = this.route.params.pipe(
+      map((params) => params['projectName']),
+      switchMap((projectName) => this.projectService.getProject(projectName))
+    );
 
-    // Subscribe to schemas for this project
-    this.schemaService.getSchemas(this.projectName).subscribe((schemas) => {
-      this.schemas.set(schemas);
-      // Update sections list from schemas
+    // Update sections list when schemas change
+    effect(() => {
+      const schemas = this.schemas();
       const sectionIds = schemas.map((schema) => schema.id);
       this.sections$.next(sectionIds);
     });
@@ -247,7 +253,8 @@ export class ProjectComponent {
     };
 
     try {
-      await this.schemaService.addSchema(this.projectName, newSchema);
+      const projectName = this.route.snapshot.params['projectName'];
+      await this.schemaService.addSchema(projectName, newSchema);
       this.closeAddCategoryModal();
     } catch (error) {
       console.error('Error creating category:', error);
@@ -274,7 +281,8 @@ export class ProjectComponent {
     };
 
     try {
-      await this.schemaService.updateSchema(this.projectName, schema.id, updatedSchema);
+      const projectName = this.route.snapshot.params['projectName'];
+      await this.schemaService.updateSchema(projectName, schema.id, updatedSchema);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error updating category:', error);
@@ -290,7 +298,8 @@ export class ProjectComponent {
     if (!confirmed) return;
 
     try {
-      await this.schemaService.deleteSchema(this.projectName, schema.id);
+      const projectName = this.route.snapshot.params['projectName'];
+      await this.schemaService.deleteSchema(projectName, schema.id);
       this.closeEditCategoryModal();
     } catch (error) {
       console.error('Error deleting category:', error);
