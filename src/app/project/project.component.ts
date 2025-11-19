@@ -357,4 +357,53 @@ export class ProjectComponent {
       alert('Failed to save card layout. Please try again.');
     }
   }
+
+  // Settings management
+  protected readonly isSettingsOpen = signal(false);
+
+  protected openSettingsModal(): void {
+    this.isSettingsOpen.set(true);
+  }
+
+  protected closeSettingsModal(): void {
+    this.isSettingsOpen.set(false);
+  }
+
+  // Invitation management
+  protected readonly isInviting = signal(false);
+  protected readonly inviteEmail = signal('');
+
+  protected openInviteModal(): void {
+    this.isInviting.set(true);
+    this.inviteEmail.set('');
+  }
+
+  protected closeInviteModal(): void {
+    this.isInviting.set(false);
+    this.inviteEmail.set('');
+  }
+
+  protected async sendInvitation(): Promise<void> {
+    const email = this.inviteEmail().trim();
+    const projectName = this.route.snapshot.params['projectName'];
+
+    if (!email) {
+      alert('Please enter an email address');
+      return;
+    }
+
+    if (!projectName) {
+      alert('Project not found');
+      return;
+    }
+
+    try {
+      await this.projectService.sendInvitation(projectName, email, projectName);
+      alert(`Invitation sent to ${email}!`);
+      this.closeInviteModal();
+    } catch (error: any) {
+      console.error('Error sending invitation:', error);
+      alert('Failed to send invitation: ' + error.message);
+    }
+  }
 }

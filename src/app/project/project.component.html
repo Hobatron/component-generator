@@ -1,7 +1,27 @@
 <div class="project-page">
   <header class="project-header">
     <div class="header-content">
-      <h1>{{ formatProjectName(projectName$ | async) }}</h1>
+      <div style="display: flex; align-items: center; gap: 0.75rem">
+        <h1>{{ formatProjectName(projectName$ | async) }}</h1>
+        <button
+          class="icon-button"
+          (click)="openSettingsModal()"
+          title="Project Settings"
+          style="
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.25rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+          "
+          onmouseover="this.style.opacity='1'"
+          onmouseout="this.style.opacity='0.7'"
+        >
+          ⚙️
+        </button>
+      </div>
       <button class="add-category-btn" (click)="openAddCategoryModal()">
         <span class="btn-icon">➕</span>
         Add New Category
@@ -299,6 +319,66 @@
           [disabled]="!editCategoryName().trim()"
         >
           Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Project Settings Modal -->
+  @if (isSettingsOpen()) {
+  <div class="modal-overlay" (click)="closeSettingsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Project Settings</h2>
+
+      <div class="form-group">
+        <h3>Collaborators</h3>
+        <p>Manage who has access to this project.</p>
+        <button class="button button-primary" (click)="closeSettingsModal(); openInviteModal()">
+          ✉️ Invite Collaborator
+        </button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" (click)="closeSettingsModal()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Invite Collaborator Modal -->
+  @if (isInviting()) {
+  <div class="modal-overlay" (click)="closeInviteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Invite Collaborator</h2>
+      <p>Send an email invitation to collaborate on this project.</p>
+
+      <div class="form-group">
+        <label for="inviteEmail">Email Address</label>
+        <input
+          id="inviteEmail"
+          type="email"
+          class="form-input"
+          placeholder="colleague@example.com"
+          [value]="inviteEmail()"
+          (input)="inviteEmail.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" (click)="closeInviteModal()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="button button-primary"
+          (click)="sendInvitation()"
+          [disabled]="!inviteEmail().trim()"
+          style="margin-left: 1rem"
+        >
+          Send Invitation
         </button>
       </div>
     </div>

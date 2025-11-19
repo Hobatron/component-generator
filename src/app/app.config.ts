@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore, persistentLocalCache } from '@angular/fire/firestore';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() =>
       initializeApp({
         apiKey: 'AIzaSyAgR1yqTBoLhuf1YJoINXvtfwReFGIvRQE',
-        authDomain: 'component-generator-1a1e8.firebaseapp.com',
+        authDomain: 'component-generator-1a1e8.web.app',
         projectId: 'component-generator-1a1e8',
         storageBucket: 'component-generator-1a1e8.firebasestorage.app',
         messagingSenderId: '382834907040',
@@ -27,14 +28,12 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideAuth(() => getAuth()),
-    provideFirestore(
-      () => {
-        const firestore = getFirestore();
-        return firestore;
-      },
-      {
-        localCache: persistentLocalCache({}),
-      }
-    ),
+    provideFirestore(() => getFirestore()),
+    provideFunctions(() => {
+      const functions = getFunctions();
+      // Uncomment if you need to connect to emulator
+      // connectFunctionsEmulator(functions, 'localhost', 5001);
+      return functions;
+    }),
   ],
 };

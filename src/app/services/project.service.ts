@@ -11,8 +11,9 @@ import {
   where,
   or,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Observable, combineLatest, of } from 'rxjs';
+import { shareReplay, map } from 'rxjs/operators';
 import { Project } from '../models/project.model';
 import { AuthService } from './auth.service';
 
@@ -21,6 +22,7 @@ import { AuthService } from './auth.service';
 })
 export class ProjectService {
   private readonly firestore = inject(Firestore);
+  private readonly functions = inject(Functions, { optional: false });
   private readonly authService = inject(AuthService);
 
   /**
@@ -45,14 +47,35 @@ export class ProjectService {
     const userId = this.authService.getCurrentUserId();
 
     if (!userId) {
-      return new Observable((observer) => observer.next([]));
+      return of([]);
     }
 
     const projectCollection = collection(this.firestore, 'projects');
-    // Query for projects where user is owner
-    const q = query(projectCollection, where('owner', '==', userId));
 
-    return (collectionData(q, { idField: 'id' }) as Observable<Project[]>).pipe(shareReplay(1));
+    // Query 1: Projects where user is owner
+    const ownedQuery = query(projectCollection, where('owner', '==', userId));
+    const owned$ = collectionData(ownedQuery, { idField: 'id' }) as Observable<Project[]>;
+
+    // Query 2: Projects where user is in collaborators array
+    const collaboratedQuery = query(
+      projectCollection,
+      where('collaborators', 'array-contains', userId)
+    );
+    const collaborated$ = collectionData(collaboratedQuery, { idField: 'id' }) as Observable<
+      Project[]
+    >;
+
+    // Combine both queries and remove duplicates
+    return combineLatest([owned$, collaborated$]).pipe(
+      map(([owned, collaborated]) => {
+        const projectMap = new Map<string, Project>();
+        [...owned, ...collaborated].forEach((project) => {
+          projectMap.set(project.id, project);
+        });
+        return Array.from(projectMap.values());
+      }),
+      shareReplay(1)
+    );
   }
 
   /**
@@ -64,21 +87,37 @@ export class ProjectService {
   }
 
   /**
-   * Add a collaborator to a project
+   * Add a collaborator to a project by email
    */
   async addCollaborator(projectId: string, userEmail: string): Promise<void> {
-    // In a real app, you'd look up the user ID by email
-    // For now, we'll use email as the identifier
-    const projectRef = doc(this.firestore, 'projects', projectId);
-    const projectData = (await docData(projectRef).toPromise()) as Project;
+    // Call Cloud Function to look up user by email
+    const getUserByEmail = httpsCallable<
+      { email: string },
+      { uid: string; email: string; displayName: string | null }
+    >(this.functions, 'getUserByEmail');
 
-    if (!projectData.collaborators) {
-      projectData.collaborators = [];
-    }
+    try {
+      // Look up the user's UID
+      const result = await getUserByEmail({ email: userEmail });
+      const userId = result.data.uid;
 
-    if (!projectData.collaborators.includes(userEmail)) {
-      projectData.collaborators.push(userEmail);
-      await setDoc(projectRef, projectData);
+      // Add the user ID to the collaborators array
+      const projectRef = doc(this.firestore, 'projects', projectId);
+      const projectData = (await docData(projectRef).toPromise()) as Project;
+
+      if (!projectData.collaborators) {
+        projectData.collaborators = [];
+      }
+
+      if (!projectData.collaborators.includes(userId)) {
+        projectData.collaborators.push(userId);
+        await setDoc(projectRef, projectData);
+      }
+    } catch (error: any) {
+      if (error.code === 'functions/not-found') {
+        throw new Error('No user found with that email address');
+      }
+      throw new Error('Failed to add collaborator: ' + error.message);
     }
   }
 
@@ -92,6 +131,36 @@ export class ProjectService {
     if (projectData.collaborators) {
       projectData.collaborators = projectData.collaborators.filter((id) => id !== userId);
       await setDoc(projectRef, projectData);
+    }
+  }
+
+  /**
+   * Send an email invitation to collaborate on a project
+   */
+  async sendInvitation(
+    projectId: string,
+    email: string,
+    projectName: string
+  ): Promise<{ success: boolean; message: string }> {
+    const sendProjectInvite = httpsCallable<
+      { email: string; projectId: string; projectName: string },
+      { success: boolean; message: string }
+    >(this.functions, 'sendProjectInvite');
+
+    try {
+      const result = await sendProjectInvite({ email, projectId, projectName });
+
+      // After sending email, add the user as collaborator if they exist
+      try {
+        await this.addCollaborator(projectId, email);
+      } catch (error) {
+        // User doesn't exist yet, they'll be added when they sign up
+        console.log('User not found, will be added when they sign up');
+      }
+
+      return result.data;
+    } catch (error: any) {
+      throw new Error('Failed to send invitation: ' + error.message);
     }
   }
 }
