@@ -7,14 +7,16 @@ import { DocumentData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Project } from '../models/project.model';
 import { CategorySchema, FieldDefinition } from '../models/category-schema.model';
+import { CardLayout } from '../models/card-layout.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ProjectService } from '../services/project.service';
+import { CardLayoutDesignerComponent } from '../card-layout-designer/card-layout-designer.component';
 
 @Component({
   selector: 'app-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
-  imports: [AsyncPipe, TitleCasePipe, RouterLink],
+  imports: [AsyncPipe, TitleCasePipe, RouterLink, CardLayoutDesignerComponent],
 })
 export class ProjectComponent {
   private readonly route = inject(ActivatedRoute);
@@ -45,6 +47,7 @@ export class ProjectComponent {
   protected readonly editCategoryName = signal('');
   protected readonly editCategoryIcon = signal('📁');
   protected readonly editingFields = signal<FieldDefinition[]>([]);
+  protected readonly activeTab = signal<'fields' | 'layout'>('fields');
 
   // New field state
   protected readonly isAddingField = signal(false);
@@ -304,6 +307,32 @@ export class ProjectComponent {
     } catch (error) {
       console.error('Error deleting category:', error);
       alert('Failed to delete category. Please try again.');
+    }
+  }
+
+  protected switchTab(tab: 'fields' | 'layout'): void {
+    this.activeTab.set(tab);
+  }
+
+  protected async onLayoutSaved(layout: CardLayout): Promise<void> {
+    const schema = this.editingSchema();
+    if (!schema) return;
+
+    const updatedSchema: CategorySchema = {
+      ...schema,
+      name: this.editCategoryName(),
+      icon: this.editCategoryIcon(),
+      fields: this.editingFields(),
+      cardLayout: layout,
+    };
+
+    try {
+      const projectName = this.route.snapshot.params['projectName'];
+      await this.schemaService.updateSchema(projectName, schema.id, updatedSchema);
+      alert('Card layout saved successfully!');
+    } catch (error) {
+      console.error('Error saving card layout:', error);
+      alert('Failed to save card layout. Please try again.');
     }
   }
 }

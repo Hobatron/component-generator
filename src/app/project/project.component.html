@@ -111,13 +111,38 @@
   <!-- Edit Category Modal -->
   @if (isEditingCategory() && editingSchema(); as schema) {
   <div class="modal-overlay" (click)="closeEditCategoryModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
+    <div
+      class="modal-container"
+      [class.modal-large]="activeTab() === 'fields'"
+      [class.modal-fullscreen]="activeTab() === 'layout'"
+      (click)="$event.stopPropagation()"
+    >
       <div class="modal-header">
         <h2 class="modal-title">Edit Category</h2>
         <button class="close-button" (click)="closeEditCategoryModal()" type="button">✕</button>
       </div>
 
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <button
+          class="tab-button"
+          [class.active]="activeTab() === 'fields'"
+          (click)="switchTab('fields')"
+        >
+          📝 Fields
+        </button>
+        <button
+          class="tab-button"
+          [class.active]="activeTab() === 'layout'"
+          (click)="switchTab('layout')"
+        >
+          🎨 Card Layout
+        </button>
+      </div>
+
       <div class="modal-body">
+        <!-- Fields Tab -->
+        @if (activeTab() === 'fields') {
         <div class="form-group">
           <label class="form-label" for="editCategoryName">Category Name</label>
           <input
@@ -270,6 +295,19 @@
             🗑️ Delete Category
           </button>
         </div>
+        }
+
+        <!-- Card Layout Tab -->
+        @if (activeTab() === 'layout') {
+        <div class="layout-designer-wrapper">
+          <app-card-layout-designer
+            [schemaFields]="editingFields()"
+            [existingLayout]="schema.cardLayout"
+            (layoutSaved)="onLayoutSaved($event)"
+            (designerClosed)="closeEditCategoryModal()"
+          />
+        </div>
+        }
       </div>
 
       <div class="modal-footer">

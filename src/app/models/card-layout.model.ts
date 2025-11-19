@@ -63,11 +63,11 @@ export interface CanvasSize {
  * Default canvas sizes for common card types
  */
 export const CARD_PRESETS: Record<string, CanvasSize> = {
-  poker: { width: 300, height: 420, name: 'Poker Card (2.5" × 3.5")' },
-  tarot: { width: 336, height: 588, name: 'Tarot Card (2.8" × 4.9")' },
-  bridge: { width: 264, height: 372, name: 'Bridge Card (2.2" × 3.1")' },
-  square: { width: 360, height: 360, name: 'Square Card (3" × 3")' },
-  custom: { width: 400, height: 600, name: 'Custom Size' },
+  poker: { width: 400, height: 560, name: 'Poker Card (2.5" × 3.5")' },
+  tarot: { width: 448, height: 784, name: 'Tarot Card (2.8" × 4.9")' },
+  bridge: { width: 352, height: 496, name: 'Bridge Card (2.2" × 3.1")' },
+  square: { width: 480, height: 480, name: 'Square Card (3" × 3")' },
+  custom: { width: 500, height: 700, name: 'Custom Size' },
 };
 
 export type CardPresetType = keyof typeof CARD_PRESETS;

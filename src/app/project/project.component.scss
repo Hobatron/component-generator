@@ -239,6 +239,30 @@
   max-width: 500px;
   width: 100%;
   animation: slideUp 0.3s ease;
+
+  &.modal-large {
+    max-width: 700px;
+  }
+
+  &.modal-fullscreen {
+    max-width: 95vw;
+    max-height: 95vh;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+
+    .modal-body {
+      flex: 1;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .layout-designer-wrapper {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 
 @keyframes slideUp {
