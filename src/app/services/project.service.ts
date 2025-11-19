@@ -12,7 +12,7 @@ import {
   or,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { shareReplay, tap } from 'rxjs/operators';
+import { shareReplay } from 'rxjs/operators';
 import { Project } from '../models/project.model';
 import { AuthService } from './auth.service';
 
@@ -43,7 +43,6 @@ export class ProjectService {
    */
   getAllProjects(): Observable<Project[]> {
     const userId = this.authService.getCurrentUserId();
-    console.log('Getting projects for user:', userId);
 
     if (!userId) {
       return new Observable((observer) => observer.next([]));
@@ -51,13 +50,9 @@ export class ProjectService {
 
     const projectCollection = collection(this.firestore, 'projects');
     // Query for projects where user is owner
-    // Note: We can't use OR with array-contains, so just query by owner for now
     const q = query(projectCollection, where('owner', '==', userId));
 
-    return (collectionData(q, { idField: 'id' }) as Observable<Project[]>).pipe(
-      tap((projects) => console.log('Projects loaded:', projects)),
-      shareReplay(1) // Share the observable and replay the last value
-    );
+    return (collectionData(q, { idField: 'id' }) as Observable<Project[]>).pipe(shareReplay(1));
   }
 
   /**

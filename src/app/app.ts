@@ -1,11 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ProjectService } from './services/project.service';
 import { ThemeService } from './services/theme.service';
 import { AuthService } from './services/auth.service';
-import { Observable } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { setLogLevel, LogLevel } from '@angular/fire';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -25,8 +26,15 @@ export class App {
   protected readonly newProjectDescription = signal('');
   protected readonly newProjectIcon = signal('🎮');
 
-  // Load all projects
-  protected readonly projects$ = this.projectService.getAllProjects();
+  // Load all projects - reactive to auth state
+  protected readonly projects$ = toObservable(this.authService.currentUser).pipe(
+    switchMap((user) => {
+      if (user) {
+        return this.projectService.getAllProjects();
+      }
+      return of([]);
+    })
+  );
 
   // Emoji options for project icon picker
   protected readonly projectEmojiOptions = [
