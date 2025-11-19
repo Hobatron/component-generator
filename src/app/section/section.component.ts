@@ -7,6 +7,7 @@ import { CardEditModalComponent } from '../card-edit-modal/card-edit-modal.compo
 import { CategorySchema, DynamicItem } from '../models/category-schema.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ItemService } from '../services/item.service';
+import { ExportService } from '../services/export.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -19,6 +20,7 @@ export class SectionComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly schemaService = inject(CategorySchemaService);
   private readonly itemService = inject(ItemService);
+  private readonly exportService = inject(ExportService);
 
   protected readonly projectName$ = this.route.params.pipe(map((params) => params['projectName']));
 
@@ -34,6 +36,9 @@ export class SectionComponent {
   protected readonly isModalOpen = signal(false);
   protected readonly editingItem = signal<DynamicItem | null>(null);
   protected readonly currentSchema = signal<CategorySchema | null>(null);
+
+  // Export dropdown state
+  protected readonly isExportMenuOpen = signal(false);
 
   // Convert items observable to signal for computed maxId
   protected readonly items = signal<DynamicItem[]>([]);
@@ -118,5 +123,52 @@ export class SectionComponent {
       console.error('Error saving item:', error);
       alert('Failed to save item. Please try again.');
     }
+  }
+
+  // Export dropdown methods
+  protected toggleExportMenu(): void {
+    this.isExportMenuOpen.set(!this.isExportMenuOpen());
+  }
+
+  protected closeExportMenu(): void {
+    this.isExportMenuOpen.set(false);
+  }
+
+  // Export methods
+  protected exportJSON(): void {
+    const items = this.items();
+    const filename = `${this.projectName}-${this.sectionName}`;
+    const schema = this.currentSchema();
+    this.exportService.exportToJSON(items, filename, schema || undefined);
+    this.closeExportMenu();
+  }
+
+  protected exportCSV(): void {
+    const items = this.items();
+    const filename = `${this.projectName}-${this.sectionName}`;
+    this.exportService.exportToCSV(items, filename);
+    this.closeExportMenu();
+  }
+
+  protected exportMarkdown(): void {
+    const items = this.items();
+    const filename = `${this.projectName}-${this.sectionName}`;
+    const categoryName = this.currentSchema()?.name || this.sectionName;
+    this.exportService.exportToMarkdown(items, filename, categoryName);
+    this.closeExportMenu();
+  }
+
+  protected async exportImages(): Promise<void> {
+    const items = this.items();
+    const schema = this.currentSchema();
+    const categoryName = schema?.name || this.sectionName;
+
+    if (!schema) {
+      alert('Schema not found');
+      return;
+    }
+
+    await this.exportService.exportAsImages(items, schema, categoryName);
+    this.closeExportMenu();
   }
 }

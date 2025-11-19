@@ -35,10 +35,18 @@
         {{ sectionName$ | async | titlecase }}
         }
       </button>
-      <button class="action-button secondary">
-        <span class="button-icon">📤</span>
-        Export
-      </button>
+      <div class="export-dropdown">
+        <button class="action-button secondary" (click)="toggleExportMenu()">
+          <span class="button-icon">📤</span>
+          Export
+        </button>
+        @if (isExportMenuOpen()) {
+        <div class="export-menu">
+          <button class="export-option" (click)="exportJSON()">📄 Export as JSON</button>
+          <button class="export-option" (click)="exportImages()">🖼️ Export as Images</button>
+        </div>
+        }
+      </div>
     </div>
   </header>
 
