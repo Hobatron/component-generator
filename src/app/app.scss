@@ -129,9 +129,10 @@
     font-weight: 600;
   }
 
-  &.login-button {
+  &.logout-btn {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.875rem;
 
     &:hover {
       background: rgba(255, 255, 255, 0.25);
@@ -249,6 +250,8 @@
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   min-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);

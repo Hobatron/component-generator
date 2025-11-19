@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Projects collection
+    match /projects/{projectId} {
+      // Allow read if user is owner or collaborator
+      // Use resource.data for reads (existing document data)
+      allow read: if isSignedIn() && 
+                     (resource.data.owner == request.auth.uid ||
+                      request.auth.uid in resource.data.get('collaborators', []));
+      
+      // Allow create only if user is authenticated and sets themselves as owner
+      allow create: if isSignedIn() && 
+                       request.resource.data.owner == request.auth.uid;
+      
+      // Allow update only if user is the owner
+      allow update: if isSignedIn() && 
+                       resource.data.owner == request.auth.uid;
+      
+      // Allow delete only if user is the owner
+      allow delete: if isSignedIn() && 
+                       resource.data.owner == request.auth.uid;
+      
+      // Nested collections within a project (schemas, items, etc.)
+      match /{document=**} {
+        // Allow read/write if user is owner or collaborator of parent project
+        allow read, write: if isSignedIn() && 
+                              (get(/databases/$(database)/documents/projects/$(projectId)).data.owner == request.auth.uid ||
+                               request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.get('collaborators', []));
+      }
+    }
+  }
+}

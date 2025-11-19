@@ -232,25 +232,41 @@ export class CardLayoutDesignerComponent {
 
     let newWidth = this.resizeStartSize.width;
     let newHeight = this.resizeStartSize.height;
+    let newX = this.resizeStartPosition.x;
+    let newY = this.resizeStartPosition.y;
 
-    // Calculate new size based on direction
+    // Calculate new size and position based on direction
     if (this.resizeDirection.includes('e')) {
+      // Resize right - just increase width
       newWidth = Math.max(50, this.resizeStartSize.width + deltaX);
     }
     if (this.resizeDirection.includes('w')) {
-      newWidth = Math.max(50, this.resizeStartSize.width - deltaX);
+      // Resize left - adjust position and width
+      const widthChange = Math.max(50, this.resizeStartSize.width - deltaX);
+      newX = this.resizeStartPosition.x + (this.resizeStartSize.width - widthChange);
+      newWidth = widthChange;
     }
     if (this.resizeDirection.includes('s')) {
+      // Resize down - just increase height
       newHeight = Math.max(30, this.resizeStartSize.height + deltaY);
     }
     if (this.resizeDirection.includes('n')) {
-      newHeight = Math.max(30, this.resizeStartSize.height - deltaY);
+      // Resize up - adjust position and height
+      const heightChange = Math.max(30, this.resizeStartSize.height - deltaY);
+      newY = this.resizeStartPosition.y + (this.resizeStartSize.height - heightChange);
+      newHeight = heightChange;
     }
 
-    // Update component size
+    // Update component size and position
     this.components.update((components) =>
       components.map((c) =>
-        c.id === this.resizeComponentId ? { ...c, size: { width: newWidth, height: newHeight } } : c
+        c.id === this.resizeComponentId
+          ? {
+              ...c,
+              size: { width: newWidth, height: newHeight },
+              position: { x: newX, y: newY },
+            }
+          : c
       )
     );
   };

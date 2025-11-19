@@ -1,3 +1,4 @@
+@if (authService.isAuthenticated()) {
 <header class="app-header">
   <div class="header-container">
     <div class="logo-section">
@@ -17,7 +18,9 @@
       <div class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
         <button class="dropdown-trigger nav-link">Projects ▼</button>
         <div class="dropdown-menu" [class.show]="showDropdown">
-          @for (project of projects$ | async; track project.id) {
+          @if (projects$ | async; as projects) { @if (projects.length === 0) {
+          <div class="dropdown-item" style="opacity: 0.6">No projects yet</div>
+          } @for (project of projects; track project.id) {
           <a [routerLink]="'/projects/' + project.id" class="dropdown-item">
             <span class="project-icon">{{ project.icon || '🎮' }}</span>
             <span class="project-info">
@@ -25,7 +28,7 @@
               <span class="project-desc">{{ project.description || 'No description' }}</span>
             </span>
           </a>
-          }
+          } }
           <button class="dropdown-item new-project-btn" (click)="openNewProjectModal()">
             <span class="project-icon">➕</span>
             <span class="project-info">
@@ -127,11 +130,12 @@
           </svg>
         </span>
       </label>
+
+      <button class="nav-link logout-btn" (click)="handleSignOut()">Sign Out</button>
     </nav>
   </div>
 </header>
-
-@if (isMobileMenuOpen()) {
+} @if (isMobileMenuOpen()) {
 <div class="mobile-menu-backdrop" (click)="closeMobileMenu()"></div>
 }
 

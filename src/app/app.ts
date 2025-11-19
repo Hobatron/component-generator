@@ -3,6 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ProjectService } from './services/project.service';
 import { ThemeService } from './services/theme.service';
+import { AuthService } from './services/auth.service';
 import { Observable } from 'rxjs';
 import { setLogLevel, LogLevel } from '@angular/fire';
 
@@ -16,6 +17,7 @@ export class App {
   private readonly router = inject(Router);
   private readonly projectService = inject(ProjectService);
   protected readonly themeService = inject(ThemeService);
+  protected readonly authService = inject(AuthService);
   protected showDropdown = false;
   protected readonly isMobileMenuOpen = signal(false);
   protected readonly isCreatingProject = signal(false);
@@ -79,9 +81,15 @@ export class App {
     const name = this.newProjectName().trim();
     const description = this.newProjectDescription().trim();
     const icon = this.newProjectIcon();
+    const userId = this.authService.getCurrentUserId();
 
     if (!name) {
       alert('Please enter a project name');
+      return;
+    }
+
+    if (!userId) {
+      alert('You must be signed in to create a project');
       return;
     }
 
@@ -89,13 +97,15 @@ export class App {
     const projectId = name.toLowerCase().replace(/\s+/g, '_');
 
     try {
-      // Create project in Firestore
+      // Create project in Firestore with current user as owner
       await this.projectService.createProject(projectId, {
         name,
         description,
         icon,
         collections: [],
         createdAt: new Date().toISOString(),
+        owner: userId,
+        collaborators: [],
       });
 
       this.closeNewProjectModal();
@@ -105,6 +115,16 @@ export class App {
     } catch (error) {
       console.error('Error creating project:', error);
       alert('Failed to create project. Please try again.');
+    }
+  }
+
+  protected async handleSignOut(): Promise<void> {
+    try {
+      await this.authService.signOut();
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Failed to sign out. Please try again.');
     }
   }
 }

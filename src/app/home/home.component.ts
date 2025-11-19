@@ -2,11 +2,24 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { ProjectService } from '../services/project.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
   template: `
     <div class="home-container">
+      <!-- Temporary: Show User ID -->
+      @if (authService.currentUser(); as user) {
+      <div
+        style="background: #f0f0f0; padding: 1rem; margin: 1rem; border-radius: 8px; font-family: monospace;"
+      >
+        <strong>Your User ID:</strong> {{ user.uid }}
+        <button (click)="copyUserId(user.uid)" style="margin-left: 1rem; padding: 0.5rem;">
+          Copy
+        </button>
+      </div>
+      }
+
       <section class="hero-section">
         <div class="hero-content">
           <h1 class="hero-title">Component Generator</h1>
@@ -123,5 +136,11 @@ import { ProjectService } from '../services/project.service';
 })
 export class HomeComponent {
   private readonly projectService = inject(ProjectService);
+  protected readonly authService = inject(AuthService);
   protected readonly projects$ = this.projectService.getAllProjects();
+
+  protected copyUserId(userId: string): void {
+    navigator.clipboard.writeText(userId);
+    alert('User ID copied to clipboard!');
+  }
 }

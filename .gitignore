@@ -46,3 +46,18 @@ Thumbs.db
 .firebase
 *-debug.log
 .runtimeconfig.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Firebase cache
+.firebase/
+
+# Firebase service account keys (NEVER commit these!)
+*-firebase-adminsdk-*.json
+service-account-*.json
+
+# Environment variables (if you add any)
+.env
+.env.local
+.env.*.local
