@@ -4,6 +4,7 @@ import { HomeComponent } from './home/home.component';
 import { ProjectComponent } from './project/project.component';
 import { SectionComponent } from './section/section.component';
 import { SchemaSeederComponent } from './migration/schema-seeder.component';
+import { DesignerTestComponent } from './designer-test/designer-test.component';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,10 @@ export const routes: Routes = [
   {
     path: 'seed-schemas',
     component: SchemaSeederComponent,
+  },
+  {
+    path: 'designer-test',
+    component: DesignerTestComponent,
   },
   {
     path: 'projects/:projectName',

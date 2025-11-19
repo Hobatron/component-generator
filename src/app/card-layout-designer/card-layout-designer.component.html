@@ -1,0 +1,92 @@
+<div class="designer-container">
+  <!-- Left Toolbar -->
+  <aside class="designer-toolbar">
+    <div class="toolbar-header">
+      <h3 class="toolbar-title">Components</h3>
+      <p class="toolbar-subtitle">Available fields</p>
+    </div>
+
+    <div class="toolbar-section">
+      <h4 class="section-title">Fields</h4>
+      <div class="field-list">
+        @for (field of availableFields(); track field.id) {
+        <div
+          class="field-item"
+          [class.disabled]="field.isUsed"
+          (click)="!field.isUsed && addComponent(field.id, field.type)"
+        >
+          <span class="field-label">{{ field.label }}</span>
+        </div>
+        } @empty {
+        <p class="empty-message">No fields in schema</p>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Canvas Area -->
+  <main class="designer-canvas-area">
+    <div class="canvas-header">
+      <h2 class="canvas-title">Card Layout Designer</h2>
+      <div class="canvas-actions">
+        <label class="grid-toggle">
+          <input type="checkbox" [checked]="showGrid()" (change)="toggleGrid()" />
+          <span>Show Grid</span>
+        </label>
+        <button class="btn btn-secondary" (click)="closeDesigner()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveLayout()">Save</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <div
+        class="canvas"
+        [class.show-grid]="showGrid()"
+        [style.width.px]="canvasSize().width"
+        [style.height.px]="canvasSize().height"
+        [style.background-size.px]="gridSize()"
+      >
+        <!-- Components will be rendered here -->
+        @for (component of components(); track component.id) {
+        <div
+          class="canvas-component"
+          cdkDrag
+          [cdkDragFreeDragPosition]="component.position"
+          [style.width.px]="component.size.width"
+          [style.height.px]="component.size.height"
+          cdkDragBoundary=".canvas"
+          (cdkDragEnded)="onDragEnded($event, component)"
+          (click)="selectComponent(component.id)"
+          [class.selected]="selectedComponentId() === component.id"
+        >
+          <span class="component-label">{{ component.fieldId }}</span>
+
+          <!-- Resize handles -->
+          @if (selectedComponentId() === component.id) {
+          <div
+            class="resize-handle resize-se"
+            (mousedown)="startResize($event, component.id, 'se')"
+          ></div>
+          <div
+            class="resize-handle resize-ne"
+            (mousedown)="startResize($event, component.id, 'ne')"
+          ></div>
+          <div
+            class="resize-handle resize-sw"
+            (mousedown)="startResize($event, component.id, 'sw')"
+          ></div>
+          <div
+            class="resize-handle resize-nw"
+            (mousedown)="startResize($event, component.id, 'nw')"
+          ></div>
+          }
+        </div>
+        } @empty {
+        <div class="canvas-empty">
+          <p>Add fields from the toolbar</p>
+        </div>
+        }
+      </div>
+    </div>
+  </main>
+</div>
