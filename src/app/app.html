@@ -14,8 +14,6 @@
     </button>
 
     <nav class="nav-section" [class.mobile-open]="isMobileMenuOpen()">
-      <a routerLink="/designer-test" class="nav-link">Designer Test</a>
-
       <div class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
         <button class="dropdown-trigger nav-link">Projects ▼</button>
         <div class="dropdown-menu" [class.show]="showDropdown">

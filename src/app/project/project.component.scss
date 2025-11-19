@@ -244,6 +244,14 @@
     max-width: 700px;
   }
 
+  &.modal-wide {
+    max-width: 900px;
+    width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
   &.modal-fullscreen {
     max-width: 95vw;
     max-height: 95vh;
@@ -274,6 +282,11 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.layout-designer-wrapper {
+  height: 750px;
+  overflow: hidden;
 }
 
 .modal-header {

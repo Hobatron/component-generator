@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { FieldDefinition } from '../models/category-schema.model';
@@ -59,6 +59,34 @@ export class CardLayoutDesignerComponent {
     key: key as CardPresetType,
     ...value,
   }));
+
+  constructor() {
+    // Load existing layout when provided
+    effect(() => {
+      const layout = this.existingLayout();
+
+      if (layout) {
+        // Load canvas size
+        if (layout.canvas) {
+          this.canvasSize.set({
+            width: layout.canvas.width,
+            height: layout.canvas.height,
+            name: 'Custom',
+          });
+        }
+
+        // Load components
+        if (layout.components && layout.components.length > 0) {
+          this.components.set([...layout.components]);
+        }
+
+        // Load grid size
+        if (layout.gridSize) {
+          this.gridSize.set(layout.gridSize);
+        }
+      }
+    });
+  }
 
   /**
    * Add a component to the canvas
@@ -135,7 +163,6 @@ export class CardLayoutDesignerComponent {
       updatedAt: new Date().toISOString(),
     };
 
-    console.log('Layout JSON:', JSON.stringify(layout, null, 2));
     this.layoutSaved.emit(layout);
   }
 

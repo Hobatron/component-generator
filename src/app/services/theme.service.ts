@@ -61,5 +61,7 @@ export class ThemeService {
    */
   private applyTheme(theme: Theme): void {
     document.documentElement.setAttribute('data-theme', theme);
+    // Set color-scheme for Angular Material
+    document.body.style.colorScheme = theme;
   }
 }

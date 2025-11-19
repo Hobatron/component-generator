@@ -5,6 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DocumentData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { MatTabsModule } from '@angular/material/tabs';
 import { Project } from '../models/project.model';
 import { CategorySchema, FieldDefinition } from '../models/category-schema.model';
 import { CardLayout } from '../models/card-layout.model';
@@ -16,7 +17,7 @@ import { CardLayoutDesignerComponent } from '../card-layout-designer/card-layout
   selector: 'app-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
-  imports: [AsyncPipe, TitleCasePipe, RouterLink, CardLayoutDesignerComponent],
+  imports: [AsyncPipe, TitleCasePipe, RouterLink, CardLayoutDesignerComponent, MatTabsModule],
 })
 export class ProjectComponent {
   private readonly route = inject(ActivatedRoute);
@@ -48,6 +49,7 @@ export class ProjectComponent {
   protected readonly editCategoryIcon = signal('📁');
   protected readonly editingFields = signal<FieldDefinition[]>([]);
   protected readonly activeTab = signal<'fields' | 'layout'>('fields');
+  protected activeTabIndex = 0;
 
   // New field state
   protected readonly isAddingField = signal(false);
@@ -275,12 +277,13 @@ export class ProjectComponent {
       return;
     }
 
-    // Update schema with new name, icon, and fields
+    // Update schema with new name, icon, and fields (preserve existing cardLayout)
     const updatedSchema: CategorySchema = {
       ...schema,
       name,
       icon,
       fields: this.editingFields(),
+      cardLayout: schema.cardLayout, // Preserve existing layout
     };
 
     try {
@@ -314,6 +317,21 @@ export class ProjectComponent {
     this.activeTab.set(tab);
   }
 
+  protected onTabChange(index: number): void {
+    this.activeTab.set(index === 0 ? 'fields' : 'layout');
+  }
+
+  protected handleCancel(): void {
+    // If on layout tab, switch back to fields tab
+    if (this.activeTab() === 'layout') {
+      this.activeTabIndex = 0;
+      this.activeTab.set('fields');
+    } else {
+      // If on fields tab, close the modal
+      this.closeEditCategoryModal();
+    }
+  }
+
   protected async onLayoutSaved(layout: CardLayout): Promise<void> {
     const schema = this.editingSchema();
     if (!schema) return;
@@ -329,6 +347,10 @@ export class ProjectComponent {
     try {
       const projectName = this.route.snapshot.params['projectName'];
       await this.schemaService.updateSchema(projectName, schema.id, updatedSchema);
+
+      // Update the editing schema signal so "Save Changes" doesn't overwrite
+      this.editingSchema.set(updatedSchema);
+
       alert('Card layout saved successfully!');
     } catch (error) {
       console.error('Error saving card layout:', error);
