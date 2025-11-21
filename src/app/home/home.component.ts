@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from '@angular/core';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { ProjectService } from '../services/project.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -121,7 +122,39 @@ import { ProjectService } from '../services/project.service';
   styleUrls: ['home.component.scss'],
   imports: [RouterLink, AsyncPipe],
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
+  private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly projects$ = this.projectService.getAllProjects();
+
+  async ngOnInit(): Promise<void> {
+    // Check for invite query parameter
+    const inviteProjectId = this.route.snapshot.queryParamMap.get('invite');
+    
+    if (inviteProjectId) {
+      await this.handleInvite(inviteProjectId);
+    }
+  }
+
+  private async handleInvite(projectId: string): Promise<void> {
+    const userId = this.authService.getCurrentUserId();
+    
+    if (!userId) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    try {
+      // Add user as collaborator to the project
+      await this.projectService.addCollaboratorById(projectId, userId);
+      
+      // Remove invite query param and navigate to the project
+      this.router.navigate(['/projects', projectId]);
+    } catch (error) {
+      console.error('Error accepting invite:', error);
+      alert('Failed to join project. The project may not exist or you may not have permission.');
+    }
+  }
 }

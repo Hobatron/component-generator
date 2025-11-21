@@ -11,6 +11,15 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore, persistentLocalCache } from '@angular/fire/firestore';
 import { getFunctions, provideFunctions } from '@angular/fire/functions';
 
+// Determine authDomain based on environment
+const getAuthDomain = (): string => {
+  // Use custom domain in production, Firebase domain for localhost
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'component-generator-1a1e8.firebaseapp.com';
+  }
+  return 'bgcrafter.com';
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -19,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() =>
       initializeApp({
         apiKey: 'AIzaSyAgR1yqTBoLhuf1YJoINXvtfwReFGIvRQE',
-        authDomain: 'component-generator-1a1e8.web.app',
+        authDomain: getAuthDomain(),
         projectId: 'component-generator-1a1e8',
         storageBucket: 'component-generator-1a1e8.firebasestorage.app',
         messagingSenderId: '382834907040',

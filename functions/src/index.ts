@@ -89,7 +89,7 @@ export const sendProjectInvite = onCall({secrets: [sendgridApiKey]}, async (requ
       subject: `You've been invited to ${projectName}`,
       text: `${inviterName} invited you to "${projectName}".
 
-Visit https://component-generator-1a1e8.web.app to access it.
+Visit https://bgcrafter.com?invite=${projectId} to access it.
 
 Sign up with Google if you don't have an account yet.`,
       html: `
@@ -98,7 +98,7 @@ Sign up with Google if you don't have an account yet.`,
             <p><strong>${inviterName}</strong> invited you to 
             <strong>"${projectName}"</strong>.</p>
             <p>
-              <a href="https://component-generator-1a1e8.web.app" 
+              <a href="https://bgcrafter.com?invite=${projectId}" 
                  style="padding: 12px 24px; background: #4285f4; 
                  color: white; text-decoration: none; 
                  border-radius: 4px;">

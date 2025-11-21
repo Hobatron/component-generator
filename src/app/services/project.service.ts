@@ -87,6 +87,27 @@ export class ProjectService {
   }
 
   /**
+   * Add a collaborator to a project by user ID
+   */
+  async addCollaboratorById(projectId: string, userId: string): Promise<void> {
+    const projectRef = doc(this.firestore, 'projects', projectId);
+    const projectData = (await docData(projectRef).toPromise()) as Project;
+
+    if (!projectData) {
+      throw new Error('Project not found');
+    }
+
+    if (!projectData.collaborators) {
+      projectData.collaborators = [];
+    }
+
+    if (!projectData.collaborators.includes(userId)) {
+      projectData.collaborators.push(userId);
+      await setDoc(projectRef, projectData);
+    }
+  }
+
+  /**
    * Add a collaborator to a project by email
    */
   async addCollaborator(projectId: string, userEmail: string): Promise<void> {
@@ -101,18 +122,8 @@ export class ProjectService {
       const result = await getUserByEmail({ email: userEmail });
       const userId = result.data.uid;
 
-      // Add the user ID to the collaborators array
-      const projectRef = doc(this.firestore, 'projects', projectId);
-      const projectData = (await docData(projectRef).toPromise()) as Project;
-
-      if (!projectData.collaborators) {
-        projectData.collaborators = [];
-      }
-
-      if (!projectData.collaborators.includes(userId)) {
-        projectData.collaborators.push(userId);
-        await setDoc(projectRef, projectData);
-      }
+      // Use the new method to add by ID
+      await this.addCollaboratorById(projectId, userId);
     } catch (error: any) {
       if (error.code === 'functions/not-found') {
         throw new Error('No user found with that email address');
