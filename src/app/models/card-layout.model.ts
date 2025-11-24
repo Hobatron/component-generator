@@ -25,9 +25,23 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'image' | 'checkbox' | 
  * Optional styling for layout components
  */
 export interface ComponentStyle {
+  fontFamily?: string;
   fontSize?: number;
-  fontWeight?: 'normal' | 'bold';
+  fontWeight?:
+    | 'normal'
+    | 'bold'
+    | 'lighter'
+    | '100'
+    | '200'
+    | '300'
+    | '400'
+    | '500'
+    | '600'
+    | '700'
+    | '800'
+    | '900';
   textAlign?: 'left' | 'center' | 'right';
+  color?: string;
   backgroundColor?: string;
   borderColor?: string;
   borderWidth?: number;

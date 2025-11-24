@@ -60,6 +60,42 @@ export class CardLayoutDesignerComponent {
     ...value,
   }));
 
+  // Available fonts
+  protected readonly availableFonts = [
+    'Arial',
+    'Helvetica',
+    'Times New Roman',
+    'Georgia',
+    'Courier New',
+    'Verdana',
+    'Trebuchet MS',
+    'Comic Sans MS',
+    'Impact',
+    'Palatino',
+    'Garamond',
+    'Bookman',
+    'Tahoma',
+    'Lucida Console',
+  ];
+
+  // Font sizes
+  protected readonly fontSizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64, 72];
+
+  // Font weights
+  protected readonly fontWeights = [
+    { value: 'normal', label: 'Normal' },
+    { value: 'bold', label: 'Bold' },
+    { value: '300', label: 'Light' },
+    { value: '600', label: 'Semi-Bold' },
+  ];
+
+  // Get selected component
+  protected readonly selectedComponent = computed(() => {
+    const id = this.selectedComponentId();
+    if (!id) return null;
+    return this.components().find((c) => c.id === id) || null;
+  });
+
   constructor() {
     // Load existing layout when provided
     effect(() => {
@@ -197,10 +233,29 @@ export class CardLayoutDesignerComponent {
   }
 
   /**
-   * Select a component
+   * Select a component visually (highlight it) without opening properties
    */
-  protected selectComponent(componentId: string): void {
+  protected selectComponentVisually(event: MouseEvent): void {
+    // Stop propagation so clicking on component doesn't trigger canvas click
+    event.stopPropagation();
+    // Just highlight the component, don't open properties panel
+    // Properties panel only opens on right-click
+  }
+
+  /**
+   * Open properties panel on right-click
+   */
+  protected openProperties(event: MouseEvent, componentId: string): void {
+    event.preventDefault(); // Prevent default context menu
+    event.stopPropagation(); // Prevent canvas click from closing panel
     this.selectedComponentId.set(componentId);
+  }
+
+  /**
+   * Close properties panel when clicking on canvas background
+   */
+  protected closePropertiesPanel(): void {
+    this.selectedComponentId.set(null);
   }
 
   /**
@@ -305,4 +360,80 @@ export class CardLayoutDesignerComponent {
     document.removeEventListener('mousemove', this.onResizeMove);
     document.removeEventListener('mouseup', this.onResizeEnd);
   };
+
+  /**
+   * Update component font family
+   */
+  protected updateFontFamily(fontFamily: string): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) => (c.id === selectedId ? { ...c, style: { ...c.style, fontFamily } } : c))
+    );
+  }
+
+  /**
+   * Update component font size
+   */
+  protected updateFontSize(fontSize: number): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) => (c.id === selectedId ? { ...c, style: { ...c.style, fontSize } } : c))
+    );
+  }
+
+  /**
+   * Update component font weight
+   */
+  protected updateFontWeight(fontWeight: string): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) =>
+        c.id === selectedId ? { ...c, style: { ...c.style, fontWeight: fontWeight as any } } : c
+      )
+    );
+  }
+
+  /**
+   * Update component text alignment
+   */
+  protected updateTextAlign(textAlign: 'left' | 'center' | 'right'): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) => (c.id === selectedId ? { ...c, style: { ...c.style, textAlign } } : c))
+    );
+  }
+
+  /**
+   * Update component text color
+   */
+  protected updateColor(color: string): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) => (c.id === selectedId ? { ...c, style: { ...c.style, color } } : c))
+    );
+  }
+
+  /**
+   * Update component background color
+   */
+  protected updateBackgroundColor(backgroundColor: string): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) =>
+        c.id === selectedId ? { ...c, style: { ...c.style, backgroundColor } } : c
+      )
+    );
+  }
 }

@@ -72,6 +72,7 @@
         [style.width.px]="canvasSize().width"
         [style.height.px]="canvasSize().height"
         [style.background-size.px]="gridSize()"
+        (click)="closePropertiesPanel()"
       >
         <!-- Components will be rendered here -->
         @for (component of components(); track component.id) {
@@ -81,9 +82,16 @@
           [cdkDragFreeDragPosition]="component.position"
           [style.width.px]="component.size.width"
           [style.height.px]="component.size.height"
+          [style.font-family]="component.style?.fontFamily || 'Arial'"
+          [style.font-size.px]="component.style?.fontSize || 16"
+          [style.font-weight]="component.style?.fontWeight || 'normal'"
+          [style.text-align]="component.style?.textAlign || 'left'"
+          [style.color]="component.style?.color || '#000000'"
+          [style.background-color]="component.style?.backgroundColor"
           cdkDragBoundary=".canvas"
           (cdkDragEnded)="onDragEnded($event, component)"
-          (click)="selectComponent(component.id)"
+          (click)="selectComponentVisually($event)"
+          (contextmenu)="openProperties($event, component.id)"
           [class.selected]="selectedComponentId() === component.id"
         >
           <span class="component-label">{{ component.fieldId }}</span>
@@ -111,9 +119,174 @@
         } @empty {
         <div class="canvas-empty">
           <p>Add fields from the toolbar</p>
+          <p class="canvas-hint">Right-click components to edit properties</p>
         </div>
         }
       </div>
     </div>
   </main>
+
+  <!-- Properties Panel (Right Sidebar) -->
+  @if (selectedComponent(); as component) {
+  <aside class="properties-panel">
+    <div class="properties-header">
+      <h3 class="properties-title">Component Properties</h3>
+      <button class="close-properties" (click)="selectedComponentId.set(null)" type="button">
+        ✕
+      </button>
+    </div>
+
+    <div class="properties-body">
+      <!-- Field Info -->
+      <div class="property-section">
+        <div class="property-info">
+          <span class="property-label">Field:</span>
+          <span class="property-value">{{ component.fieldId }}</span>
+        </div>
+        <div class="property-info">
+          <span class="property-label">Type:</span>
+          <span class="property-value">{{ component.type }}</span>
+        </div>
+      </div>
+
+      <!-- Typography Section -->
+      <div class="property-section">
+        <h4 class="section-title">Typography</h4>
+
+        <div class="property-group">
+          <label class="property-label">Font Family</label>
+          <select
+            class="property-select"
+            [value]="component.style?.fontFamily || 'Arial'"
+            (change)="updateFontFamily($any($event.target).value)"
+          >
+            @for (font of availableFonts; track font) {
+            <option [value]="font">{{ font }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="property-group">
+          <label class="property-label">Font Size</label>
+          <select
+            class="property-select"
+            [value]="component.style?.fontSize || 16"
+            (change)="updateFontSize(+$any($event.target).value)"
+          >
+            @for (size of fontSizes; track size) {
+            <option [value]="size">{{ size }}px</option>
+            }
+          </select>
+        </div>
+
+        <div class="property-group">
+          <label class="property-label">Font Weight</label>
+          <select
+            class="property-select"
+            [value]="component.style?.fontWeight || 'normal'"
+            (change)="updateFontWeight($any($event.target).value)"
+          >
+            @for (weight of fontWeights; track weight.value) {
+            <option [value]="weight.value">{{ weight.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="property-group">
+          <label class="property-label">Text Align</label>
+          <div class="align-buttons">
+            <button
+              type="button"
+              class="align-btn"
+              [class.active]="component.style?.textAlign === 'left' || !component.style?.textAlign"
+              (click)="updateTextAlign('left')"
+              title="Align Left"
+            >
+              ◧
+            </button>
+            <button
+              type="button"
+              class="align-btn"
+              [class.active]="component.style?.textAlign === 'center'"
+              (click)="updateTextAlign('center')"
+              title="Align Center"
+            >
+              ▭
+            </button>
+            <button
+              type="button"
+              class="align-btn"
+              [class.active]="component.style?.textAlign === 'right'"
+              (click)="updateTextAlign('right')"
+              title="Align Right"
+            >
+              ◨
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appearance Section -->
+      <div class="property-section">
+        <h4 class="section-title">Appearance</h4>
+
+        <div class="property-group">
+          <label class="property-label">Text Color</label>
+          <input
+            type="color"
+            class="property-color"
+            [value]="component.style?.color || '#000000'"
+            (change)="updateColor($any($event.target).value)"
+          />
+          <span class="color-value">{{ component.style?.color || '#000000' }}</span>
+        </div>
+
+        <div class="property-group">
+          <label class="property-label">Background</label>
+          <input
+            type="color"
+            class="property-color"
+            [value]="component.style?.backgroundColor || '#ffffff'"
+            (change)="updateBackgroundColor($any($event.target).value)"
+          />
+          <span class="color-value">{{ component.style?.backgroundColor || 'Transparent' }}</span>
+        </div>
+      </div>
+
+      <!-- Position Section -->
+      <div class="property-section">
+        <h4 class="section-title">Position</h4>
+
+        <div class="property-row">
+          <div class="property-group-half">
+            <label class="property-label">X</label>
+            <input type="number" class="property-input" [value]="component.position.x" readonly />
+          </div>
+          <div class="property-group-half">
+            <label class="property-label">Y</label>
+            <input type="number" class="property-input" [value]="component.position.y" readonly />
+          </div>
+        </div>
+
+        <div class="property-row">
+          <div class="property-group-half">
+            <label class="property-label">Width</label>
+            <input type="number" class="property-input" [value]="component.size.width" readonly />
+          </div>
+          <div class="property-group-half">
+            <label class="property-label">Height</label>
+            <input type="number" class="property-input" [value]="component.size.height" readonly />
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Button -->
+      <div class="property-section">
+        <button type="button" class="btn-delete" (click)="deleteSelectedComponent()">
+          🗑️ Delete Component
+        </button>
+      </div>
+    </div>
+  </aside>
+  }
 </div>
