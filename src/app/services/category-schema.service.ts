@@ -4,6 +4,7 @@ import {
   doc,
   collection,
   collectionData,
+  docData,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -24,6 +25,16 @@ export class CategorySchemaService {
     const projectRef = doc(this.firestore, 'projects', projectId);
     const schemasRef = collection(projectRef, 'schemas');
     return collectionData(schemasRef, { idField: 'id' }) as Observable<CategorySchema[]>;
+  }
+
+  /**
+   * Get a single schema by ID as an observable
+   */
+  getSchema(projectId: string, schemaId: string): Observable<CategorySchema> {
+    const projectRef = doc(this.firestore, 'projects', projectId);
+    const schemasRef = collection(projectRef, 'schemas');
+    const schemaRef = doc(schemasRef, schemaId);
+    return docData(schemaRef, { idField: 'id' }) as Observable<CategorySchema>;
   }
 
   /**

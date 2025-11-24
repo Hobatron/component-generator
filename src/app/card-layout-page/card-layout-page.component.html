@@ -1,0 +1,24 @@
+<div class="layout-page">
+  @if (schema(); as schema) {
+  <div class="layout-page-header">
+    <h1>Card Layout Designer</h1>
+    <div class="header-info">
+      <span class="category-badge"> {{ schema.icon }} {{ schema.name }} </span>
+      <span class="project-name">{{ projectName() }}</span>
+    </div>
+  </div>
+
+  <div class="layout-page-content">
+    <app-card-layout-designer
+      [schemaFields]="schema.fields"
+      [existingLayout]="schema.cardLayout"
+      (layoutSaved)="onLayoutSaved($event)"
+      (designerClosed)="onDesignerClosed()"
+    />
+  </div>
+  } @else {
+  <div class="loading">
+    <p>Loading schema...</p>
+  </div>
+  }
+</div>

@@ -28,7 +28,7 @@ export class CardLayoutDesignerComponent {
   designerClosed = output<void>();
 
   // State
-  protected readonly canvasSize = signal(CARD_PRESETS['trading']);
+  protected readonly canvasSize = signal(CARD_PRESETS['mtg']);
   protected readonly components = signal<LayoutComponent[]>([]);
   protected readonly selectedComponentId = signal<string | null>(null);
   protected readonly gridSize = signal(10);
@@ -69,9 +69,10 @@ export class CardLayoutDesignerComponent {
         // Load canvas size - try to match with existing preset or use custom
         if (layout.canvas) {
           const matchingPreset = Object.values(CARD_PRESETS).find(
-            (preset) => preset.width === layout.canvas.width && preset.height === layout.canvas.height
+            (preset) =>
+              preset.width === layout.canvas.width && preset.height === layout.canvas.height
           );
-          
+
           if (matchingPreset) {
             this.canvasSize.set(matchingPreset);
           } else {
@@ -155,7 +156,7 @@ export class CardLayoutDesignerComponent {
     const select = event.target as HTMLSelectElement;
     const presetKey = select.value as CardPresetType;
     const preset = CARD_PRESETS[presetKey];
-    
+
     if (preset) {
       this.canvasSize.set(preset);
     }

@@ -5,6 +5,7 @@ import { ProjectComponent } from './project/project.component';
 import { SectionComponent } from './section/section.component';
 import { SchemaSeederComponent } from './migration/schema-seeder.component';
 import { LoginComponent } from './auth/login.component';
+import { CardLayoutPageComponent } from './card-layout-page/card-layout-page.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -25,6 +26,11 @@ export const routes: Routes = [
   {
     path: 'projects/:projectName',
     component: ProjectComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'projects/:projectName/card-layout/:schemaId',
+    component: CardLayoutPageComponent,
     canActivate: [authGuard],
   },
   {

@@ -1,23 +1,20 @@
 import { Component, inject, signal, computed, effect } from '@angular/core';
-import { AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
+import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DocumentData } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { MatTabsModule } from '@angular/material/tabs';
 import { Project } from '../models/project.model';
 import { CategorySchema, FieldDefinition } from '../models/category-schema.model';
-import { CardLayout } from '../models/card-layout.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ProjectService } from '../services/project.service';
-import { CardLayoutDesignerComponent } from '../card-layout-designer/card-layout-designer.component';
 
 @Component({
   selector: 'app-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
-  imports: [AsyncPipe, TitleCasePipe, RouterLink, CardLayoutDesignerComponent, MatTabsModule],
+  imports: [AsyncPipe, TitleCasePipe, RouterLink],
 })
 export class ProjectComponent {
   private readonly route = inject(ActivatedRoute);
@@ -48,8 +45,6 @@ export class ProjectComponent {
   protected readonly editCategoryName = signal('');
   protected readonly editCategoryIcon = signal('📁');
   protected readonly editingFields = signal<FieldDefinition[]>([]);
-  protected readonly activeTab = signal<'fields' | 'layout'>('fields');
-  protected activeTabIndex = 0;
 
   // New field state
   protected readonly isAddingField = signal(false);
@@ -164,6 +159,14 @@ export class ProjectComponent {
     this.isEditingCategory.set(false);
     this.editingSchema.set(null);
     this.isAddingField.set(false);
+  }
+
+  protected openCardLayoutDesigner(schema: CategorySchema): void {
+    const projectName = this.route.snapshot.params['projectName'];
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/projects', projectName, 'card-layout', schema.id])
+    );
+    window.open(url, '_blank');
   }
 
   protected openAddFieldForm(): void {
@@ -310,51 +313,6 @@ export class ProjectComponent {
     } catch (error) {
       console.error('Error deleting category:', error);
       alert('Failed to delete category. Please try again.');
-    }
-  }
-
-  protected switchTab(tab: 'fields' | 'layout'): void {
-    this.activeTab.set(tab);
-  }
-
-  protected onTabChange(index: number): void {
-    this.activeTab.set(index === 0 ? 'fields' : 'layout');
-  }
-
-  protected handleCancel(): void {
-    // If on layout tab, switch back to fields tab
-    if (this.activeTab() === 'layout') {
-      this.activeTabIndex = 0;
-      this.activeTab.set('fields');
-    } else {
-      // If on fields tab, close the modal
-      this.closeEditCategoryModal();
-    }
-  }
-
-  protected async onLayoutSaved(layout: CardLayout): Promise<void> {
-    const schema = this.editingSchema();
-    if (!schema) return;
-
-    const updatedSchema: CategorySchema = {
-      ...schema,
-      name: this.editCategoryName(),
-      icon: this.editCategoryIcon(),
-      fields: this.editingFields(),
-      cardLayout: layout,
-    };
-
-    try {
-      const projectName = this.route.snapshot.params['projectName'];
-      await this.schemaService.updateSchema(projectName, schema.id, updatedSchema);
-
-      // Update the editing schema signal so "Save Changes" doesn't overwrite
-      this.editingSchema.set(updatedSchema);
-
-      alert('Card layout saved successfully!');
-    } catch (error) {
-      console.error('Error saving card layout:', error);
-      alert('Failed to save card layout. Please try again.');
     }
   }
 
