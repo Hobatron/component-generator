@@ -7,6 +7,33 @@
     </div>
 
     <div class="toolbar-section">
+      <h4 class="section-title">Card Size</h4>
+      <div class="card-size-selector">
+        <select class="size-dropdown" (change)="changeCardSize($event)">
+          @for (preset of cardPresets; track preset.key) {
+          <option [value]="preset.key" [selected]="canvasSize().name === preset.name">
+            {{ preset.name }}
+          </option>
+          }
+        </select>
+        <div class="size-info">
+          <div class="size-detail">
+            <strong>{{ canvasSize().physicalSize.inches.width }}" × {{
+              canvasSize().physicalSize.inches.height
+            }}"</strong>
+          </div>
+          <div class="size-detail-small">
+            {{ canvasSize().physicalSize.mm.width }}mm × {{ canvasSize().physicalSize.mm.height
+            }}mm
+          </div>
+          <div class="size-detail-small">
+            {{ canvasSize().width }}px × {{ canvasSize().height }}px
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar-section">
       <h4 class="section-title">Fields</h4>
       <div class="field-list">
         @for (field of availableFields(); track field.id) {
