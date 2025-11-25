@@ -62,6 +62,16 @@ export class App {
 
   constructor() {
     setLogLevel(LogLevel.VERBOSE);
+
+    // Log current user ID for debugging
+    toObservable(this.authService.currentUser).subscribe((user) => {
+      if (user) {
+        console.log('🔑 Current User ID:', user.uid);
+        console.log('📧 Current User Email:', user.email);
+      } else {
+        console.log('❌ No user logged in');
+      }
+    });
   }
 
   protected toggleMobileMenu(): void {

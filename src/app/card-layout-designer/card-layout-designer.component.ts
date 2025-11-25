@@ -31,6 +31,7 @@ export class CardLayoutDesignerComponent {
   protected readonly canvasSize = signal(CARD_PRESETS['mtg']);
   protected readonly components = signal<LayoutComponent[]>([]);
   protected readonly selectedComponentId = signal<string | null>(null);
+  protected readonly showPropertiesPanel = signal(false); // Controls panel visibility
   protected readonly gridSize = signal(10);
   protected readonly showGrid = signal(true);
 
@@ -235,11 +236,12 @@ export class CardLayoutDesignerComponent {
   /**
    * Select a component visually (highlight it) without opening properties
    */
-  protected selectComponentVisually(event: MouseEvent): void {
+  protected selectComponentVisually(event: MouseEvent, componentId: string): void {
     // Stop propagation so clicking on component doesn't trigger canvas click
     event.stopPropagation();
-    // Just highlight the component, don't open properties panel
-    // Properties panel only opens on right-click
+    // Highlight the component but don't open properties panel
+    this.selectedComponentId.set(componentId);
+    // Properties panel stays in its current state (open or closed)
   }
 
   /**
@@ -249,6 +251,7 @@ export class CardLayoutDesignerComponent {
     event.preventDefault(); // Prevent default context menu
     event.stopPropagation(); // Prevent canvas click from closing panel
     this.selectedComponentId.set(componentId);
+    this.showPropertiesPanel.set(true); // Open the properties panel
   }
 
   /**
@@ -256,6 +259,7 @@ export class CardLayoutDesignerComponent {
    */
   protected closePropertiesPanel(): void {
     this.selectedComponentId.set(null);
+    this.showPropertiesPanel.set(false);
   }
 
   /**
@@ -266,6 +270,7 @@ export class CardLayoutDesignerComponent {
     if (selectedId) {
       this.components.update((components) => components.filter((c) => c.id !== selectedId));
       this.selectedComponentId.set(null);
+      this.showPropertiesPanel.set(false);
     }
   }
 
@@ -434,6 +439,31 @@ export class CardLayoutDesignerComponent {
       components.map((c) =>
         c.id === selectedId ? { ...c, style: { ...c.style, backgroundColor } } : c
       )
+    );
+  }
+
+  /**
+   * Toggle transparent background
+   */
+  protected toggleTransparentBackground(isTransparent: boolean): void {
+    const selectedId = this.selectedComponentId();
+    if (!selectedId) return;
+
+    this.components.update((components) =>
+      components.map((c) => {
+        if (c.id === selectedId) {
+          const newStyle = { ...c.style };
+          if (isTransparent) {
+            // Remove backgroundColor to make it transparent
+            delete newStyle.backgroundColor;
+          } else {
+            // Set to white when unchecking transparent
+            newStyle.backgroundColor = '#ffffff';
+          }
+          return { ...c, style: newStyle };
+        }
+        return c;
+      })
     );
   }
 }

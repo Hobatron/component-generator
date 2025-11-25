@@ -81,42 +81,6 @@ import { AuthService } from '../services/auth.service';
         </div>
         } }
       </section>
-
-      <section class="features-section">
-        <h2 class="section-title">Key Features</h2>
-        <div class="features-grid">
-          <div class="feature-item">
-            <div class="feature-icon-large">➕</div>
-            <h3>Create Projects</h3>
-            <p>Start new projects with custom names, descriptions, and icons</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-large">📋</div>
-            <h3>Custom Categories</h3>
-            <p>Add unlimited categories to organize your game data your way</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-large">🔧</div>
-            <h3>Flexible Fields</h3>
-            <p>Define custom fields: text, numbers, dropdowns, and textareas</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-large">✏️</div>
-            <h3>Edit Schemas</h3>
-            <p>Modify category structures anytime - add or remove fields as needed</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-large">🔥</div>
-            <h3>Real-time Sync</h3>
-            <p>Powered by Firestore for instant updates across all devices</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-large">🎨</div>
-            <h3>Beautiful UI</h3>
-            <p>Modern, responsive design built with Angular and best practices</p>
-          </div>
-        </div>
-      </section>
     </div>
   `,
   styleUrls: ['home.component.scss'],
@@ -132,7 +96,7 @@ export class HomeComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     // Check for invite query parameter
     const inviteProjectId = this.route.snapshot.queryParamMap.get('invite');
-    
+
     if (inviteProjectId) {
       await this.handleInvite(inviteProjectId);
     }
@@ -140,7 +104,7 @@ export class HomeComponent implements OnInit {
 
   private async handleInvite(projectId: string): Promise<void> {
     const userId = this.authService.getCurrentUserId();
-    
+
     if (!userId) {
       console.error('User not authenticated');
       return;
@@ -149,7 +113,7 @@ export class HomeComponent implements OnInit {
     try {
       // Add user as collaborator to the project
       await this.projectService.addCollaboratorById(projectId, userId);
-      
+
       // Remove invite query param and navigate to the project
       this.router.navigate(['/projects', projectId]);
     } catch (error) {

@@ -90,7 +90,7 @@
           [style.background-color]="component.style?.backgroundColor"
           cdkDragBoundary=".canvas"
           (cdkDragEnded)="onDragEnded($event, component)"
-          (click)="selectComponentVisually($event)"
+          (click)="selectComponentVisually($event, component.id)"
           (contextmenu)="openProperties($event, component.id)"
           [class.selected]="selectedComponentId() === component.id"
         >
@@ -127,11 +127,11 @@
   </main>
 
   <!-- Properties Panel (Right Sidebar) -->
-  @if (selectedComponent(); as component) {
+  @if (showPropertiesPanel() && selectedComponent(); as component) {
   <aside class="properties-panel">
     <div class="properties-header">
       <h3 class="properties-title">Component Properties</h3>
-      <button class="close-properties" (click)="selectedComponentId.set(null)" type="button">
+      <button class="close-properties" (click)="showPropertiesPanel.set(false)" type="button">
         ✕
       </button>
     </div>
@@ -243,13 +243,24 @@
 
         <div class="property-group">
           <label class="property-label">Background</label>
-          <input
-            type="color"
-            class="property-color"
-            [value]="component.style?.backgroundColor || '#ffffff'"
-            (change)="updateBackgroundColor($any($event.target).value)"
-          />
-          <span class="color-value">{{ component.style?.backgroundColor || 'Transparent' }}</span>
+          <div class="color-control">
+            <input
+              type="color"
+              class="property-color"
+              [value]="component.style?.backgroundColor || '#ffffff'"
+              [disabled]="!component.style?.backgroundColor"
+              (change)="updateBackgroundColor($any($event.target).value)"
+            />
+            <span class="color-value">{{ component.style?.backgroundColor || 'None' }}</span>
+            <label class="transparent-toggle">
+              <input
+                type="checkbox"
+                [checked]="!component.style?.backgroundColor"
+                (change)="toggleTransparentBackground($any($event.target).checked)"
+              />
+              <span>Transparent</span>
+            </label>
+          </div>
         </div>
       </div>
 

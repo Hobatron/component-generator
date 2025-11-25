@@ -1,3 +1,13 @@
+export type CollaboratorPermission = 'read' | 'write';
+
+export interface Collaborator {
+  userId: string;
+  email?: string;
+  displayName?: string;
+  permission: CollaboratorPermission;
+  addedAt: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -7,5 +17,5 @@ export interface Project {
   collections?: string[];
   createdAt?: string;
   owner: string; // User ID of the project owner
-  collaborators?: string[]; // Array of user IDs who can access this project
+  collaborators?: Collaborator[]; // Array of collaborators with permissions
 }

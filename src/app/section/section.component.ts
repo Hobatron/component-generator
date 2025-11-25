@@ -2,12 +2,13 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { CardEditModalComponent } from '../card-edit-modal/card-edit-modal.component';
 import { CategorySchema, DynamicItem } from '../models/category-schema.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ItemService } from '../services/item.service';
 import { ExportService } from '../services/export.service';
+import { ProjectService } from '../services/project.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -21,6 +22,7 @@ export class SectionComponent {
   private readonly schemaService = inject(CategorySchemaService);
   private readonly itemService = inject(ItemService);
   private readonly exportService = inject(ExportService);
+  private readonly projectService = inject(ProjectService);
 
   protected readonly projectName$ = this.route.params.pipe(map((params) => params['projectName']));
 
@@ -48,6 +50,19 @@ export class SectionComponent {
     const itemsList = this.items();
     if (itemsList.length === 0) return 0;
     return Math.max(...itemsList.map((item) => Number(item['id']) || 0));
+  });
+
+  // Get project data for permission checks
+  protected readonly project = toSignal(
+    this.route.params.pipe(
+      map((params) => params['projectName']),
+      switchMap((projectName) => this.projectService.getProject(projectName))
+    )
+  );
+
+  // Permission checks
+  protected readonly hasWriteAccess = computed(() => {
+    return this.projectService.hasWriteAccess(this.project());
   });
 
   constructor() {
@@ -82,6 +97,10 @@ export class SectionComponent {
   }
 
   protected openAddModal(): void {
+    if (!this.hasWriteAccess()) {
+      alert('You do not have permission to add items');
+      return;
+    }
     if (!this.currentSchema()) {
       console.error('Cannot open modal: Schema not loaded');
       alert('Schema not loaded. Please ensure category schemas are configured in Firestore.');
@@ -92,6 +111,10 @@ export class SectionComponent {
   }
 
   protected openEditModal(item: DynamicItem): void {
+    if (!this.hasWriteAccess()) {
+      alert('You do not have permission to edit items');
+      return;
+    }
     if (!this.currentSchema()) {
       console.error('Cannot open modal: Schema not loaded');
       alert('Schema not loaded. Please ensure category schemas are configured in Firestore.');

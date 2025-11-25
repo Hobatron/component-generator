@@ -363,10 +363,10 @@
 }
 
 .component-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  text-align: center;
+  // Inherit font styles from parent component
+  // This allows the properties panel settings to apply
+  pointer-events: none;
+  user-select: none;
 }
 
 .component-type {
@@ -584,6 +584,36 @@
   &::-webkit-color-swatch {
     border: none;
     border-radius: 4px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.transparent-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+
+  input[type='checkbox'] {
+    cursor: pointer;
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
   }
 }
 

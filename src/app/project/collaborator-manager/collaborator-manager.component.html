@@ -1,0 +1,149 @@
+<div class="collaborator-manager">
+  <div class="header">
+    <h3>Team Members</h3>
+    @if (isOwner()) {
+    <button class="btn-add" (click)="openAddCollaboratorForm()" [disabled]="isLoading()">
+      <span class="icon">➕</span>
+      Add Collaborator
+    </button>
+    }
+  </div>
+
+  <!-- Owner Section -->
+  <div class="owner-section">
+    <div class="section-title">Owner</div>
+    <div class="member-card owner-card">
+      <div class="member-info">
+        <div class="member-avatar">👤</div>
+        <div class="member-details">
+          <div class="member-name">Project Owner</div>
+          <div class="member-email">Full Access</div>
+        </div>
+      </div>
+      <div class="member-role">
+        <span class="badge badge-owner">Owner</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collaborators Section -->
+  @if (collaborators().length > 0) {
+  <div class="collaborators-section">
+    <div class="section-title">Collaborators ({{ collaborators().length }})</div>
+    <div class="members-list">
+      @for (collaborator of collaborators(); track collaborator.userId) {
+      <div class="member-card" [class.current-user]="isCurrentUser(collaborator)">
+        <div class="member-info">
+          <div class="member-avatar">👤</div>
+          <div class="member-details">
+            <div class="member-name">
+              {{ getCollaboratorDisplay(collaborator) }}
+              @if (isCurrentUser(collaborator)) {
+              <span class="you-badge">(You)</span>
+              }
+            </div>
+            @if (collaborator.email) {
+            <div class="member-email">{{ collaborator.email }}</div>
+            }
+          </div>
+        </div>
+
+        <div class="member-actions">
+          <!-- Permission Toggle -->
+          @if (isOwner()) {
+          <label class="permission-toggle">
+            <input
+              type="checkbox"
+              [checked]="collaborator.permission === 'write'"
+              (change)="togglePermission(collaborator)"
+              [disabled]="isLoading()"
+            />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">
+              {{ collaborator.permission === 'write' ? 'Write' : 'Read' }}
+            </span>
+          </label>
+          } @else {
+          <span
+            class="badge"
+            [class.badge-write]="collaborator.permission === 'write'"
+            [class.badge-read]="collaborator.permission === 'read'"
+          >
+            {{ collaborator.permission === 'write' ? 'Write' : 'Read' }}
+          </span>
+          }
+
+          <!-- Remove Button (only for owner) -->
+          @if (isOwner()) {
+          <button
+            class="btn-remove"
+            (click)="removeCollaborator(collaborator)"
+            [disabled]="isLoading()"
+            title="Remove collaborator"
+          >
+            ✕
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Add Collaborator Modal -->
+  @if (isAddingCollaborator()) {
+  <div class="modal-overlay" (click)="closeAddCollaboratorForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Collaborator</h3>
+        <button class="btn-close" (click)="closeAddCollaboratorForm()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="collaborator-email">Email Address</label>
+          <input
+            id="collaborator-email"
+            type="email"
+            class="form-control"
+            placeholder="colleague@example.com"
+            [(ngModel)]="newCollaboratorEmail"
+            [disabled]="isLoading()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="collaborator-permission">Permission Level</label>
+          <select
+            id="collaborator-permission"
+            class="form-control"
+            [(ngModel)]="newCollaboratorPermission"
+            [disabled]="isLoading()"
+          >
+            <option value="read">Read Only - Can view project content</option>
+            <option value="write">Read & Write - Can edit project content</option>
+          </select>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeAddCollaboratorForm()" [disabled]="isLoading()">
+          Cancel
+        </button>
+        <button class="btn-primary" (click)="addCollaborator()" [disabled]="isLoading()">
+          @if (isLoading()) {
+          <span class="spinner"></span>
+          Adding... } @else { Add Collaborator }
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

@@ -22,13 +22,14 @@ import { CategorySchema, DynamicItem } from '../models/category-schema.model';
         [style.top.px]="component.position.y"
         [style.width.px]="component.size.width"
         [style.height.px]="component.size.height"
+        [style.font-family]="component.style?.fontFamily || 'Arial'"
         [style.font-size.px]="component.style?.fontSize || 25"
         [style.font-weight]="component.style?.fontWeight || 'normal'"
-        [style.color]="'#000000'"
+        [style.text-align]="component.style?.textAlign || 'left'"
+        [style.color]="component.style?.color || '#000000'"
         [style.background-color]="component.style?.backgroundColor"
         [style.border]="getBorder(component)"
         [style.padding.px]="component.style?.padding || 8"
-        [style.text-align]="component.style?.textAlign || 'left'"
       >
         {{ getFieldValue(component.fieldId) }}
       </div>

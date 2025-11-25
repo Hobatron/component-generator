@@ -29,12 +29,14 @@
     </div>
 
     <div class="section-actions">
+      @if (hasWriteAccess()) {
       <button class="action-button primary" (click)="openAddModal()">
         <span class="button-icon">➕</span>
         @if (currentSchema(); as schema) { Add New {{ schema.name }} } @else { Add New
         {{ sectionName$ | async | titlecase }}
         }
       </button>
+      }
       <div class="export-dropdown">
         <button class="action-button secondary" (click)="toggleExportMenu()">
           <span class="button-icon">📤</span>
@@ -62,12 +64,14 @@
             {{ schema.name }} #{{ item['id'] }}
             } @else { Unnamed Item }
           </h3>
+          @if (hasWriteAccess()) {
           <div class="item-actions">
             <button class="item-action-btn edit" title="Edit" (click)="openEditModal(item)">
               ✏️
             </button>
             <button class="item-action-btn delete" title="Delete">🗑️</button>
           </div>
+          }
         </div>
 
         <div class="item-content">
@@ -95,10 +99,12 @@
         <div class="empty-icon">📭</div>
         <h3>No {{ sectionName$ | async }} found</h3>
         <p>Get started by adding your first {{ sectionName$ | async | titlecase }}.</p>
+        @if (hasWriteAccess()) {
         <button class="action-button primary" (click)="openAddModal()">
           <span class="button-icon">➕</span>
           Add {{ sectionName$ | async | titlecase }}
         </button>
+        }
       </div>
       }
     </div>

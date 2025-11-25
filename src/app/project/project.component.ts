@@ -9,12 +9,13 @@ import { Project } from '../models/project.model';
 import { CategorySchema, FieldDefinition } from '../models/category-schema.model';
 import { CategorySchemaService } from '../services/category-schema.service';
 import { ProjectService } from '../services/project.service';
+import { CollaboratorManagerComponent } from './collaborator-manager/collaborator-manager.component';
 
 @Component({
   selector: 'app-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
-  imports: [AsyncPipe, TitleCasePipe, RouterLink],
+  imports: [AsyncPipe, TitleCasePipe, RouterLink, CollaboratorManagerComponent],
 })
 export class ProjectComponent {
   private readonly route = inject(ActivatedRoute);
@@ -25,6 +26,12 @@ export class ProjectComponent {
   protected readonly projectName$ = this.route.params.pipe(map((params) => params['projectName']));
 
   project$: Observable<DocumentData | Project | undefined>;
+  protected readonly project = toSignal(
+    this.route.params.pipe(
+      map((params) => params['projectName']),
+      switchMap((projectName) => this.projectService.getProject(projectName))
+    )
+  );
   sections$: BehaviorSubject<string[]> = new BehaviorSubject<string[]>([]);
 
   // Category management - derived from route params
@@ -107,6 +114,15 @@ export class ProjectComponent {
     { emoji: '🌙', label: 'Moon' },
     { emoji: '☀️', label: 'Sun' },
   ];
+
+  // Permission checks
+  protected readonly isOwner = computed(() => {
+    return this.projectService.isOwner(this.project());
+  });
+
+  protected readonly hasWriteAccess = computed(() => {
+    return this.projectService.hasWriteAccess(this.project());
+  });
 
   constructor() {
     // Subscribe to route parameter changes to handle project switching
@@ -238,6 +254,11 @@ export class ProjectComponent {
   }
 
   protected async createCategory(): Promise<void> {
+    if (!this.hasWriteAccess()) {
+      alert('You do not have permission to create categories');
+      return;
+    }
+
     const name = this.newCategoryName().trim();
     const icon = this.newCategoryIcon();
 
@@ -271,6 +292,11 @@ export class ProjectComponent {
   }
 
   protected async updateCategory(): Promise<void> {
+    if (!this.hasWriteAccess()) {
+      alert('You do not have permission to update categories');
+      return;
+    }
+
     const schema = this.editingSchema();
     const name = this.editCategoryName().trim();
     const icon = this.editCategoryIcon();
@@ -300,6 +326,11 @@ export class ProjectComponent {
   }
 
   protected async deleteCategory(schema: CategorySchema): Promise<void> {
+    if (!this.hasWriteAccess()) {
+      alert('You do not have permission to delete categories');
+      return;
+    }
+
     const confirmed = confirm(
       `Are you sure you want to delete "${schema.name}"? This will remove the category schema but not the items.`
     );

@@ -22,10 +22,12 @@
           ⚙️
         </button>
       </div>
+      @if (hasWriteAccess()) {
       <button class="add-category-btn" (click)="openAddCategoryModal()">
         <span class="btn-icon">➕</span>
         Add New Category
       </button>
+      }
     </div>
   </header>
 
@@ -57,11 +59,11 @@
           >
             View {{ section | titlecase }}
           </a>
-          @if (getSchemaForSection(section); as schema) {
+          @if (getSchemaForSection(section); as schema) { @if (hasWriteAccess()) {
           <button class="nav-button secondary" (click)="openEditCategoryModal(schema)">
             ✏️ Edit
           </button>
-          }
+          } }
         </div>
       </div>
     </section>
@@ -324,15 +326,16 @@
   <!-- Project Settings Modal -->
   @if (isSettingsOpen()) {
   <div class="modal-overlay" (click)="closeSettingsModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Project Settings</h2>
+    <div class="modal-content settings-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Project Settings</h2>
+        <button class="close-button" (click)="closeSettingsModal()" type="button">✕</button>
+      </div>
 
-      <div class="form-group">
-        <h3>Collaborators</h3>
-        <p>Manage who has access to this project.</p>
-        <button class="button button-primary" (click)="closeSettingsModal(); openInviteModal()">
-          ✉️ Invite Collaborator
-        </button>
+      <div class="modal-body">
+        @if (project(); as projectData) {
+        <app-collaborator-manager [project]="$any(projectData)" />
+        }
       </div>
 
       <div class="modal-actions">
